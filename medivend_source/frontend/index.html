@@ -1,0 +1,3021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediVend — Smart Pharmacy Platform</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ─── DESIGN SYSTEM ───────────────────────────────── */
+:root {
+  --white:   #ffffff;
+  --gray-50: #f8fafc;
+  --gray-100:#f1f5f9;
+  --gray-200:#e2e8f0;
+  --gray-300:#cbd5e1;
+  --gray-400:#94a3b8;
+  --gray-500:#64748b;
+  --gray-600:#475569;
+  --gray-700:#334155;
+  --gray-800:#1e293b;
+  --gray-900:#0f172a;
+  --blue-50:  #eff6ff;
+  --blue-100: #dbeafe;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+  --blue-700: #1d4ed8;
+  --emerald:  #10b981;
+  --emerald-l:#d1fae5;
+  --amber:    #f59e0b;
+  --amber-l:  #fef3c7;
+  --red:      #ef4444;
+  --red-l:    #fee2e2;
+  --violet:   #8b5cf6;
+  --violet-l: #ede9fe;
+  --cyan:     #06b6d4;
+  --cyan-l:   #cffafe;
+
+  --text:   var(--gray-900);
+  --text2:  var(--gray-600);
+  --text3:  var(--gray-400);
+  --border: var(--gray-200);
+  --bg:     var(--gray-50);
+  --surface:var(--white);
+
+  --sidebar-w: 248px;
+  --topbar-h:  60px;
+  --r:   14px;
+  --r-sm: 9px;
+  --r-xs: 6px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.05);
+  --shadow:    0 1px 3px rgba(0,0,0,.07), 0 4px 16px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 20px rgba(0,0,0,.09), 0 1px 3px rgba(0,0,0,.06);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,.12);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);font-size:13.5px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--gray-200);border-radius:20px;}
+::-webkit-scrollbar-thumb:hover{background:var(--gray-300);}
+input,textarea,select,button{font-family:'Plus Jakarta Sans',sans-serif;}
+.fa-solid{font-size:inherit;line-height:1;}
+
+/* ─── LOGIN ─────────────────────────────────────── */
+#login-screen {
+  min-height:100vh;display:flex;align-items:stretch;
+}
+.login-left {
+  flex:1;
+  background: linear-gradient(160deg, #0f172a 0%, #1e3a5f 50%, #2563eb 100%);
+  display:flex;flex-direction:column;justify-content:space-between;
+  padding:48px;position:relative;overflow:hidden;
+}
+.login-left::before {
+  content:'';position:absolute;inset:0;
+  background: radial-gradient(ellipse 100% 80% at 80% 20%, rgba(59,130,246,.3) 0%, transparent 60%),
+              radial-gradient(ellipse 60% 60% at 10% 90%, rgba(16,185,129,.15) 0%, transparent 50%);
+}
+.login-left-content{position:relative;z-index:2;}
+.login-brand{display:flex;align-items:center;gap:12px;margin-bottom:48px;}
+.login-brand-icon{width:44px;height:44px;background:rgba(255,255,255,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;backdrop-filter:blur(8px);}
+.login-brand-name{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.5px;}
+.login-brand-tag{font-size:11px;color:rgba(255,255,255,.5);font-weight:400;letter-spacing:.5px;text-transform:uppercase;}
+.login-headline{font-size:38px;font-weight:800;color:#fff;line-height:1.2;letter-spacing:-1px;margin-bottom:16px;}
+.login-sub{font-size:15px;color:rgba(255,255,255,.6);line-height:1.6;max-width:360px;}
+.login-features{display:flex;flex-direction:column;gap:14px;margin-top:40px;}
+.login-feat{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,.8);font-size:13.5px;}
+.login-feat-icon{width:34px;height:34px;background:rgba(255,255,255,.1);border-radius:var(--r-xs);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.login-left-footer{position:relative;z-index:2;font-size:12px;color:rgba(255,255,255,.3);}
+
+.login-right {
+  width:480px;background:var(--white);display:flex;align-items:center;justify-content:center;padding:48px 40px;
+}
+.login-form-wrap{width:100%;}
+.login-form-title{font-size:26px;font-weight:800;letter-spacing:-.5px;margin-bottom:6px;}
+.login-form-sub{font-size:13.5px;color:var(--text2);margin-bottom:32px;}
+
+.tab-row{display:flex;gap:0;border:1.5px solid var(--border);border-radius:var(--r-sm);overflow:hidden;margin-bottom:28px;}
+.tab-btn{flex:1;padding:9px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:transparent;color:var(--text2);transition:.15s;}
+.tab-btn.active{background:var(--blue-600);color:#fff;}
+
+.f-group{margin-bottom:16px;}
+.f-label{display:block;font-size:11.5px;font-weight:700;color:var(--gray-600);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+.f-input{
+  width:100%;padding:11px 14px;background:var(--gray-50);
+  border:1.5px solid var(--border);border-radius:var(--r-sm);
+  font-size:13.5px;color:var(--text);outline:none;transition:.15s;
+}
+.f-input:focus{border-color:var(--blue-500);background:var(--white);box-shadow:0 0 0 3px rgba(59,130,246,.1);}
+.f-input::placeholder{color:var(--text3);}
+select.f-input option{background:var(--white);}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 20px;border-radius:var(--r-sm);font-size:13.5px;font-weight:700;cursor:pointer;border:none;transition:.15s;letter-spacing:-.1px;}
+.icon-inline{display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+.btn-blue{background:var(--blue-600);color:#fff;box-shadow:0 4px 12px rgba(37,99,235,.25);}
+.btn-blue:hover{background:var(--blue-700);transform:translateY(-1px);box-shadow:0 6px 20px rgba(37,99,235,.3);}
+.btn-blue:active{transform:translateY(0);}
+.btn-full{width:100%;}
+.btn-sm{padding:6px 13px;font-size:12.5px;}
+.btn-xs{padding:4px 10px;font-size:11.5px;}
+.btn-ghost{background:var(--white);border:1.5px solid var(--border);color:var(--text2);}
+.btn-ghost:hover{background:var(--gray-50);border-color:var(--gray-300);color:var(--text);}
+.btn-green{background:var(--emerald-l);color:#059669;border:1.5px solid #a7f3d0;}
+.btn-green:hover{background:#a7f3d0;}
+.btn-red{background:var(--red-l);color:var(--red);border:1.5px solid #fca5a5;}
+.btn-red:hover{background:#fecaca;}
+.btn-amber{background:var(--amber-l);color:#b45309;border:1.5px solid #fcd34d;}
+.btn-violet{background:var(--violet-l);color:var(--violet);border:1.5px solid #c4b5fd;}
+
+.err-box{background:var(--red-l);border:1.5px solid #fca5a5;color:var(--red);padding:10px 14px;border-radius:var(--r-sm);font-size:13px;margin-bottom:16px;display:none;font-weight:500;}
+.ok-box{background:var(--emerald-l);border:1.5px solid #6ee7b7;color:#059669;padding:10px 14px;border-radius:var(--r-sm);font-size:13px;margin-bottom:16px;display:none;font-weight:500;}
+
+.demo-block{margin-top:24px;padding:16px;background:var(--gray-50);border:1.5px solid var(--border);border-radius:var(--r-sm);}
+.demo-block-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:10px;}
+.demo-cred-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:12.5px;}
+.demo-cred-row:last-of-type{margin-bottom:0;}
+.demo-email{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--blue-600);cursor:pointer;text-decoration:underline;text-underline-offset:2px;}
+.demo-role{display:flex;align-items:center;gap:6px;font-weight:600;color:var(--text);}
+
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ─── APP ─────────────────────────────────────── */
+/* Hidden until login; enterApp() must set inline display (e.g. block) empty string would NOT override this rule. */
+#app-screen{display:none;}
+body.mv-signed-in #login-screen{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+.layout{display:flex;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{
+  width:var(--sidebar-w);position:fixed;top:0;left:0;bottom:0;
+  background:var(--white);border-right:1.5px solid var(--border);
+  display:flex;flex-direction:column;z-index:10000;
+  isolation:isolate;
+}
+.sb-header{padding:18px 16px 14px;border-bottom:1.5px solid var(--border);}
+.sb-brand{display:flex;align-items:center;gap:10px;}
+.sb-brand-icon{width:36px;height:36px;background:var(--blue-600);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 4px 12px rgba(37,99,235,.25);}
+.sb-brand-name{font-size:16px;font-weight:800;letter-spacing:-.4px;color:var(--text);}
+.sb-brand-sub{font-size:10px;color:var(--text3);font-weight:500;letter-spacing:.3px;text-transform:uppercase;}
+
+.sb-user-card{margin:10px 10px 0;padding:10px 12px;background:var(--gray-50);border:1.5px solid var(--border);border-radius:var(--r-sm);display:flex;align-items:center;gap:10px;}
+.sb-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--blue-500),var(--violet));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0;letter-spacing:-.5px;}
+.sb-user-name{font-size:13px;font-weight:700;color:var(--text);}
+.sb-user-role{font-size:11px;color:var(--text3);font-weight:500;}
+.sb-status{display:inline-flex;align-items:center;gap:4px;}
+.sb-dot{width:6px;height:6px;border-radius:50%;background:var(--emerald);box-shadow:0 0 0 2px rgba(16,185,129,.2);}
+
+.sb-nav{flex:1;overflow-y:auto;padding:6px 10px 10px;position:relative;z-index:2;}
+.sb-section-lbl{padding:10px 6px 4px;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;}
+.sb-item{
+  width:100%;display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--r-sm);
+  cursor:pointer;color:var(--text2);font-size:13px;font-weight:600;transition:.12s;
+  position:relative;margin-bottom:1px;border:none;background:transparent;text-align:left;
+  appearance:none;-webkit-appearance:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
+}
+.sb-item:hover{background:var(--gray-50);color:var(--text);}
+.sb-item.active{background:var(--blue-50);color:var(--blue-600);}
+.sb-item.active::before{content:'';position:absolute;left:-10px;top:25%;bottom:25%;width:3px;background:var(--blue-600);border-radius:0 3px 3px 0;}
+.sb-icon{font-size:15px;width:18px;text-align:center;}
+.sb-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;min-width:20px;text-align:center;}
+.sb-badge-amber{background:var(--amber)!important;color:#fff!important;}
+
+.sb-bottom{padding:12px 10px;border-top:1.5px solid var(--border);}
+.sb-logout{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:var(--r-sm);cursor:pointer;color:var(--red);font-size:13px;font-weight:600;transition:.12s;}
+.sb-logout:hover{background:var(--red-l);}
+.sb-conn{padding:7px 10px;margin-bottom:6px;border-radius:var(--r-sm);font-size:11.5px;font-weight:600;display:flex;align-items:center;gap:6px;}
+.sb-conn.live{background:var(--emerald-l);color:#059669;}
+.sb-conn.demo{background:var(--amber-l);color:#b45309;}
+.sb-conn.offline{background:var(--red-l);color:var(--red);}
+.sb-conn-dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+
+/* MAIN */
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;position:relative;z-index:1;}
+
+/* TOPBAR */
+.topbar{
+  height:var(--topbar-h);background:var(--white);border-bottom:1.5px solid var(--border);
+  padding:0 24px;display:flex;align-items:center;gap:12px;
+  position:sticky;top:0;z-index:50;
+}
+.topbar-title{font-size:17px;font-weight:800;flex:1;letter-spacing:-.4px;color:var(--text);}
+.topbar-search{
+  display:flex;align-items:center;gap:8px;background:var(--gray-50);
+  border:1.5px solid var(--border);border-radius:var(--r-sm);
+  padding:8px 12px;width:210px;transition:.15s;
+}
+.topbar-search:focus-within{border-color:var(--blue-500);background:var(--white);}
+.topbar-search input{border:none;background:transparent;color:var(--text);font-size:13px;outline:none;width:100%;}
+.topbar-search input::placeholder{color:var(--text3);}
+.topbar-actions{display:flex;align-items:center;gap:8px;}
+.topbar-btn{width:36px;height:36px;background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:.12s;position:relative;}
+.topbar-btn:hover{background:var(--gray-50);}
+.notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--red);border:1.5px solid var(--white);}
+.live-pill{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--emerald);background:var(--emerald-l);border:1.5px solid #a7f3d0;padding:5px 11px;border-radius:20px;}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--emerald);animation:livepulse 2s ease infinite;}
+@keyframes livepulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(.7);}}
+
+/* CONTENT */
+.content{padding:24px;flex:1;}
+.view{display:none;}
+.view.active{display:block;animation:slideUp .2s ease both;}
+@keyframes slideUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* CARDS */
+.card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:var(--shadow-sm);}
+.card:hover{box-shadow:var(--shadow);}
+
+/* STAT GRID */
+.sg{display:grid;gap:14px;margin-bottom:20px;}
+.sg-4{grid-template-columns:repeat(4,1fr);}
+.sg-3{grid-template-columns:repeat(3,1fr);}
+.sc{
+  background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);
+  padding:18px 20px;position:relative;overflow:hidden;transition:.15s;cursor:default;
+  box-shadow:var(--shadow-sm);
+}
+.sc:hover{box-shadow:var(--shadow);transform:translateY(-1px);}
+.sc-accent{position:absolute;top:0;left:0;right:0;height:3px;background:var(--sc-color,var(--blue-500));border-radius:var(--r) var(--r) 0 0;}
+.sc-label{font-size:11.5px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.sc-val{font-size:30px;font-weight:800;letter-spacing:-1.5px;line-height:1;font-family:'IBM Plex Mono',monospace;}
+.sc-sub{font-size:12px;color:var(--text2);margin-top:6px;}
+.sc-ico{position:absolute;right:16px;top:18px;font-size:22px;opacity:.12;}
+
+/* SECTION HEADER */
+.sh{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.sh-title{font-size:15px;font-weight:800;letter-spacing:-.3px;color:var(--text);}
+.sh-sub{font-size:12px;color:var(--text2);margin-top:3px;font-weight:500;}
+.sh-r{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+
+/* LAYOUT GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.g31{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;}
+.mb12{margin-bottom:12px;}
+.mb16{margin-bottom:16px;}
+.mb20{margin-bottom:20px;}
+.mt16{margin-top:16px;}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:700;white-space:nowrap;letter-spacing:-.1px;}
+.bd{width:5px;height:5px;border-radius:50%;background:currentColor;}
+.b-red   {background:var(--red-l);   color:#dc2626;border:1px solid #fca5a5;}
+.b-amber {background:var(--amber-l); color:#b45309;border:1px solid #fcd34d;}
+.b-green {background:var(--emerald-l);color:#059669;border:1px solid #6ee7b7;}
+.b-blue  {background:var(--blue-50); color:var(--blue-600);border:1px solid var(--blue-100);}
+.b-violet{background:var(--violet-l);color:var(--violet);border:1px solid #c4b5fd;}
+.b-gray  {background:var(--gray-100);color:var(--gray-600);border:1px solid var(--border);}
+.b-cyan  {background:var(--cyan-l);  color:#0891b2;border:1px solid #a5f3fc;}
+
+/* TABLES */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead th{padding:10px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);border-bottom:1.5px solid var(--border);text-align:left;background:var(--gray-50);}
+tbody td{padding:12px 14px;font-size:13px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:var(--gray-50);}
+.mono{font-family:'IBM Plex Mono',monospace;font-size:12px;}
+
+/* STOCK BAR */
+.sbar-row{display:flex;align-items:center;gap:8px;}
+.sbar-bg{flex:1;height:6px;background:var(--gray-200);border-radius:20px;overflow:hidden;}
+.sbar-fill{height:100%;border-radius:20px;transition:width .4s;}
+.sbar-lbl{font-size:11px;font-weight:700;min-width:30px;text-align:right;font-family:'IBM Plex Mono',monospace;}
+
+/* QUEUE */
+.qgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.qcard{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;transition:.15s;box-shadow:var(--shadow-sm);}
+.qcard:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);border-color:var(--blue-200,#bfdbfe);}
+.qcard-img{height:100px;background:linear-gradient(135deg,var(--blue-50),var(--gray-100));display:flex;align-items:center;justify-content:center;font-size:38px;position:relative;}
+.qcard-badge{position:absolute;top:10px;right:10px;}
+.qcard-body{padding:14px 15px;}
+.qcard-meta{font-size:11px;color:var(--text3);margin-bottom:3px;font-weight:600;}
+.qcard-name{font-size:14px;font-weight:800;margin-bottom:6px;letter-spacing:-.3px;}
+.qcard-drug{font-size:11.5px;color:var(--blue-600);background:var(--blue-50);border:1px solid var(--blue-100);padding:3px 9px;border-radius:20px;display:inline-block;margin-bottom:12px;font-weight:600;}
+.qcard-actions{display:flex;gap:6px;}
+
+/* CHAT */
+.chat-shell{display:grid;grid-template-columns:256px 1fr;height:520px;border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-sm);}
+.chat-sidebar{border-right:1.5px solid var(--border);overflow-y:auto;background:var(--gray-50);}
+.chat-li{padding:13px 14px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;gap:10px;transition:.12s;}
+.chat-li:hover{background:var(--white);}
+.chat-li.active{background:var(--blue-50);border-left:3px solid var(--blue-600);}
+.chat-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.chat-area{display:flex;flex-direction:column;background:var(--white);min-height:0;}
+.chat-header{padding:14px 18px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--gray-50);}
+.chat-msgs{flex:1;min-height:0;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;}
+.msg{max-width:70%;}
+.msg-bub{padding:10px 14px;border-radius:12px;font-size:13.5px;line-height:1.5;}
+.msg.sent{align-self:flex-end;}
+.msg.sent .msg-bub{background:var(--blue-600);color:#fff;border-bottom-right-radius:4px;}
+.msg.recv{align-self:flex-start;}
+.msg.recv .msg-bub{background:var(--gray-100);border:1px solid var(--border);border-bottom-left-radius:4px;color:var(--text);}
+.msg-time{font-size:10px;color:var(--text3);margin-top:3px;text-align:right;}
+.chat-footer{padding:12px 14px;border-top:1.5px solid var(--border);display:flex;gap:8px;background:var(--gray-50);}
+.chat-footer{position:sticky;bottom:0;z-index:2;}
+.chat-inp{flex:1;padding:10px 14px;background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-sm);font-size:13.5px;color:var(--text);outline:none;transition:.15s;}
+.chat-inp:focus{border-color:var(--blue-500);}
+
+/* UPLOAD */
+.upload-zone{border:2px dashed var(--gray-300);border-radius:var(--r);padding:44px 24px;text-align:center;cursor:pointer;transition:.15s;background:var(--gray-50);}
+.upload-zone:hover{border-color:var(--blue-500);background:var(--blue-50);}
+.upload-ico{font-size:36px;margin-bottom:12px;}
+
+/* TIMELINE */
+.tl{position:relative;padding-left:28px;}
+.tl::before{content:'';position:absolute;left:9px;top:8px;bottom:0;width:2px;background:var(--border);}
+.tl-item{position:relative;margin-bottom:18px;}
+.tl-dot{position:absolute;left:-25px;top:2px;width:12px;height:12px;border-radius:50%;border:2px solid var(--border);background:var(--white);}
+.tl-dot.done{background:var(--emerald);border-color:var(--emerald);}
+.tl-dot.cur{background:var(--blue-600);border-color:var(--blue-600);box-shadow:0 0 0 4px rgba(37,99,235,.15);}
+.tl-label{font-size:13.5px;font-weight:700;color:var(--text);}
+.tl-sub{font-size:12px;color:var(--text2);margin-top:2px;}
+
+/* ALERT ROWS */
+.al-row{display:flex;align-items:center;gap:12px;padding:13px 15px;border-radius:var(--r-sm);margin-bottom:8px;border:1.5px solid;}
+.al-row:last-child{margin-bottom:0;}
+.al-row.critical{background:#fff5f5;border-color:#fca5a5;}
+.al-row.warning {background:#fffbeb;border-color:#fcd34d;}
+.al-row.low{background:#fefce8;border-color:#fde047;}
+.al-ico{font-size:18px;flex-shrink:0;}
+.al-body{flex:1;}
+.al-title{font-size:13px;font-weight:700;color:var(--text);}
+.al-sub{font-size:11.5px;color:var(--text2);margin-top:2px;}
+
+/* CHARTS */
+.ch{position:relative;height:240px;}
+.ch-sm{position:relative;height:180px;}
+.ch-lg{position:relative;height:290px;}
+
+/* FORM */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:12000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);pointer-events:auto;}
+.modal-box{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:28px;width:520px;max-width:95vw;box-shadow:var(--shadow-lg);animation:slideUp .2s ease;}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.modal-title{font-size:16px;font-weight:800;letter-spacing:-.3px;}
+.modal-x{font-size:20px;cursor:pointer;color:var(--text3);line-height:1;transition:.12s;}
+.modal-x:hover{color:var(--text);}
+
+/* TOAST */
+.toast-wrap{
+  position:fixed;top:68px;right:18px;z-index:11000;display:flex;flex-direction:column;gap:8px;
+  pointer-events:none;align-items:flex-end;max-width:min(380px,calc(100vw - var(--sidebar-w) - 32px));
+}
+.toast{
+  pointer-events:auto;
+  background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-sm);
+  padding:13px 16px;min-width:300px;max-width:380px;display:flex;align-items:flex-start;gap:10px;
+  box-shadow:var(--shadow-md);animation:slideRight .25s ease;
+}
+@keyframes slideRight{from{opacity:0;transform:translateX(16px);}to{opacity:1;transform:translateX(0);}}
+.toast.success{border-left:3px solid var(--emerald);}
+.toast.error{border-left:3px solid var(--red);}
+.toast.info{border-left:3px solid var(--blue-500);}
+.toast.warning{border-left:3px solid var(--amber);}
+.toast-ico{font-size:16px;flex-shrink:0;margin-top:1px;}
+.toast-body{flex:1;}
+.toast-title{font-weight:700;font-size:13px;margin-bottom:2px;}
+.toast-sub{font-size:12px;color:var(--text2);}
+.toast-x{cursor:pointer;color:var(--text3);font-size:14px;flex-shrink:0;}
+
+/* NOTIF */
+.notif-panel{position:fixed;top:62px;right:14px;width:340px;max-width:calc(100vw - var(--sidebar-w) - 28px);background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);z-index:11000;display:none;box-shadow:var(--shadow-lg);}
+.notif-panel.open{display:block;animation:slideUp .15s ease;}
+.notif-hdr{padding:14px 16px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.notif-title{font-size:14px;font-weight:800;}
+.notif-item{padding:12px 16px;border-bottom:1px solid var(--gray-100);display:flex;gap:10px;cursor:pointer;transition:.1s;}
+.notif-item:hover{background:var(--gray-50);}
+.notif-item:last-child{border:none;}
+.notif-ico{font-size:18px;flex-shrink:0;}
+.notif-t{font-size:12.5px;font-weight:700;margin-bottom:2px;}
+.notif-s{font-size:11.5px;color:var(--text2);}
+.notif-tm{font-size:11px;color:var(--text3);margin-top:2px;}
+
+/* PATIENT HERO */
+.p-hero{background:linear-gradient(130deg,#0f172a 0%,#1e3a5f 50%,#2563eb 100%);border-radius:var(--r);padding:28px 32px;margin-bottom:18px;position:relative;overflow:hidden;}
+.p-hero::after{content:'\f484';font-family:'Font Awesome 6 Free';font-weight:900;position:absolute;right:24px;bottom:12px;font-size:64px;opacity:.08;transform:rotate(-8deg);}
+.p-hero h2{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.5px;margin-bottom:6px;}
+.p-hero p{font-size:13.5px;color:rgba(255,255,255,.6);}
+
+/* DRUG DETAIL */
+.drug-detail{border:1.5px solid var(--border);border-radius:var(--r-sm);padding:16px;margin-top:14px;background:var(--gray-50);}
+.drug-name-lg{font-size:16px;font-weight:800;margin-bottom:8px;letter-spacing:-.3px;}
+.drug-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.drug-row{margin-bottom:10px;}
+.drug-rl{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);font-weight:700;margin-bottom:3px;}
+.drug-rv{font-size:13px;color:var(--text);}
+
+/* INLINE EDIT */
+.edit-inp{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-xs);padding:5px 8px;color:var(--text);font-size:12px;width:72px;font-family:'IBM Plex Mono',monospace;text-align:center;}
+.edit-inp:focus{border-color:var(--blue-500);outline:none;}
+
+/* REVENUE HERO */
+.rev-card{background:linear-gradient(130deg,#0f172a 0%,#1e3a5f 100%);border-radius:var(--r);padding:22px 24px;color:#fff;}
+.rev-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:rgba(255,255,255,.5);font-weight:700;margin-bottom:6px;}
+.rev-val{font-size:32px;font-weight:800;letter-spacing:-1.5px;font-family:'IBM Plex Mono',monospace;margin-bottom:4px;}
+.rev-chg{font-size:12.5px;color:rgba(255,255,255,.6);}
+.rev-up{color:#34d399;}
+
+/* FC TABLE */
+.fc-critical td{background:#fff8f8!important;}
+.fc-warning td{background:#fffdf0!important;}
+
+/* EMPTY */
+.empty{text-align:center;padding:36px 20px;color:var(--text3);}
+.empty-ico{font-size:36px;margin-bottom:10px;}
+.empty-title{font-size:15px;font-weight:700;color:var(--text2);}
+.empty-sub{font-size:12.5px;margin-top:4px;}
+
+/* RESPONSIVE */
+@media(max-width:1100px){.sg-4{grid-template-columns:repeat(2,1fr)}.qgrid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:860px){.g2,.g31{grid-template-columns:1fr}.g3{grid-template-columns:1fr 1fr}.login-left{display:none}.login-right{width:100%}}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+<!-- ═══════ LOGIN ═══════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-left">
+    <div class="login-left-content">
+      <div class="login-brand">
+        <div class="login-brand-icon"><i class="fa-solid fa-staff-snake"></i></div>
+        <div>
+          <div class="login-brand-name">MediVend</div>
+          <div class="login-brand-tag">Smart Pharmacy Platform</div>
+        </div>
+      </div>
+      <div class="login-headline">The future of<br>pharmacy management</div>
+      <div class="login-sub">AI-powered predictions, real-time inventory control, and seamless tele-pharmacy — built for Saudi healthcare.</div>
+      <div class="login-features">
+        <div class="login-feat"><div class="login-feat-icon"><i class="fa-solid fa-chart-line"></i></div>ML demand forecasting with 30-day horizon</div>
+        <div class="login-feat"><div class="login-feat-icon"><i class="fa-solid fa-bolt"></i></div>Real-time Supabase sync across all devices</div>
+        <div class="login-feat"><div class="login-feat-icon"><i class="fa-solid fa-stethoscope"></i></div>Tele-pharmacy with human-in-the-loop approval</div>
+        <div class="login-feat"><div class="login-feat-icon"><i class="fa-solid fa-box-open"></i></div>Live inventory with AI shortage alerts</div>
+      </div>
+    </div>
+    <div class="login-left-footer">MediVend © 2026 · Graduation Project · Powered by Supabase + sklearn</div>
+  </div>
+
+  <div class="login-right">
+    <div class="login-form-wrap">
+      <div class="login-form-title">Welcome back <i class="fa-solid fa-hand"></i></div>
+      <div class="login-form-sub">Sign in to continue to MediVend</div>
+
+      <div class="tab-row">
+        <button class="tab-btn active" id="tab-in"  onclick="switchTab('in')">Sign In</button>
+        <button class="tab-btn"        id="tab-up"  onclick="switchTab('up')">Register</button>
+      </div>
+
+      <!-- ERRORS -->
+      <div id="login-err" class="err-box"></div>
+      <div id="login-ok"  class="ok-box"></div>
+
+      <!-- SIGN IN -->
+      <div id="form-in">
+        <div class="f-group">
+          <label class="f-label">Email Address</label>
+          <input class="f-input" type="email" id="li-email" placeholder="you@medivend.sa" autocomplete="email">
+        </div>
+        <div class="f-group">
+          <label class="f-label">Password</label>
+          <input class="f-input" type="password" id="li-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+        </div>
+        <button class="btn btn-blue btn-full" id="li-btn" onclick="doLogin()">
+          <span id="li-label">Sign In to MediVend</span>
+          <div class="spinner" id="li-spin"></div>
+        </button>
+
+        <div class="demo-block">
+          <div class="demo-block-title"><i class="fa-solid fa-rocket"></i> Demo Credentials — click to auto-fill</div>
+          <div class="demo-cred-row">
+            <span class="demo-role"><i class="fa-solid fa-user-doctor"></i> Pharmacist</span>
+            <span class="demo-email" onclick="fillDemo('pharmacist@medivend.sa','Demo1234!')">pharmacist@medivend.sa</span>
+          </div>
+          <div class="demo-cred-row">
+            <span class="demo-role"><i class="fa-solid fa-user"></i> Patient</span>
+            <span class="demo-email" onclick="fillDemo('patient@medivend.sa','Demo1234!')">patient@medivend.sa</span>
+          </div>
+          <div style="margin-top:10px;font-size:11px;color:var(--text3)">Password: <span class="mono">Demo1234!</span></div>
+          <button class="btn btn-ghost btn-full btn-sm" style="margin-top:10px" onclick="demoMode()"><i class="fa-solid fa-bolt"></i> Enter Demo Mode (no DB needed)</button>
+        </div>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="form-up" style="display:none">
+        <div class="form-row">
+          <div class="f-group"><label class="f-label">Full Name</label><input class="f-input" type="text" id="ru-name" placeholder="Dr. Ahmed Hassan"></div>
+          <div class="f-group"><label class="f-label">Role</label>
+            <select class="f-input" id="ru-role">
+              <option value="patient">Patient</option>
+              <option value="pharmacist">Pharmacist</option>
+            </select>
+          </div>
+        </div>
+        <div class="f-group"><label class="f-label">Email</label><input class="f-input" type="email" id="ru-email" placeholder="you@example.com"></div>
+        <div class="f-group"><label class="f-label">Password (min 6 chars)</label><input class="f-input" type="password" id="ru-pass" placeholder="••••••••"></div>
+        <button class="btn btn-blue btn-full" id="ru-btn" onclick="doRegister()">
+          <span id="ru-label">Create Account</span>
+          <div class="spinner" id="ru-spin"></div>
+        </button>
+      </div>
+
+      <div style="text-align:center;margin-top:16px;font-size:12px;color:var(--text3)">
+        Powered by Supabase · MediVend ML Engine v2
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ TOASTS ════════════════════════════════════ -->
+<div class="toast-wrap" id="toasts"></div>
+
+<!-- ═══════ NOTIF PANEL ══════════════════════════════ -->
+<div class="notif-panel" id="notif-panel">
+  <div class="notif-hdr">
+    <div class="notif-title">Notifications</div>
+    <span class="badge b-red" id="notif-count">—</span>
+  </div>
+  <div id="notif-list"></div>
+</div>
+
+<!-- ═══════ MODAL ════════════════════════════════════ -->
+<div class="modal-bg" id="modal" style="display:none" onclick="maybeCloseModal(event)">
+  <div class="modal-box" id="modal-box">
+    <div class="modal-hdr">
+      <div class="modal-title" id="modal-title">—</div>
+      <span class="modal-x" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></span>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- ═══════ APP ════════════════════════════════════ -->
+<div id="app-screen">
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-header">
+      <div class="sb-brand">
+        <div class="sb-brand-icon"><i class="fa-solid fa-staff-snake"></i></div>
+        <div>
+          <div class="sb-brand-name">MediVend</div>
+          <div class="sb-brand-sub">Smart Pharmacy</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sb-user-card">
+      <div class="sb-avatar" id="sb-avatar">?</div>
+      <div style="min-width:0">
+        <div class="sb-user-name" id="sb-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Loading...</div>
+        <div class="sb-user-role"><span class="sb-dot"></span> <span id="sb-role">—</span></div>
+      </div>
+    </div>
+
+    <nav class="sb-nav" id="sb-nav"></nav>
+
+    <div class="sb-bottom">
+      <div class="sb-conn" id="sb-conn-status">
+        <span class="sb-conn-dot"></span> Connecting...
+      </div>
+      <div style="padding:4px 6px 6px;font-size:10.5px;color:var(--text3)">
+        DB: <span class="mono">hdpbzflntprxnctucyfp</span>
+      </div>
+      <div class="sb-logout" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-title" id="page-title">Dashboard</div>
+      <div class="topbar-search">
+        <span style="font-size:14px;color:var(--text3)"><i class="fa-solid fa-magnifying-glass"></i></span>
+        <input type="text" placeholder="Search drugs, patients..." oninput="globalSearch(this.value)">
+      </div>
+      <div class="topbar-actions">
+        <div class="live-pill" id="rt-pill"><div class="live-dot"></div><span id="rt-text">Live</span></div>
+        <div class="topbar-btn" onclick="toggleNotif(event)"><i class="fa-solid fa-bell"></i><div class="notif-dot"></div></div>
+        <div class="topbar-btn" onclick="nav('settings')"><i class="fa-solid fa-gear"></i></div>
+      </div>
+    </header>
+
+    <div class="content" id="content-area" onclick="closeNotif()">
+
+      <!-- ════ DASHBOARD ════════════════════════════ -->
+      <div class="view active" id="view-dashboard">
+        <div class="sg sg-4 mb20">
+          <div class="sc" style="--sc-color:var(--blue-500)">
+            <div class="sc-accent"></div>
+            <div class="sc-label">Drugs Tracked</div>
+            <div class="sc-val" id="d-drugs">15</div>
+            <div class="sc-sub">Across 8 categories</div>
+            <div class="sc-ico"><i class="fa-solid fa-pills"></i></div>
+          </div>
+          <div class="sc" style="--sc-color:var(--red)">
+            <div class="sc-accent"></div>
+            <div class="sc-label">Critical Alerts</div>
+            <div class="sc-val" id="d-critical" style="color:var(--red)">5</div>
+            <div class="sc-sub">Stockout within 5 days</div>
+            <div class="sc-ico"><i class="fa-solid fa-triangle-exclamation"></i></div>
+          </div>
+          <div class="sc" style="--sc-color:var(--emerald)">
+            <div class="sc-accent"></div>
+            <div class="sc-label">Prescriptions Today</div>
+            <div class="sc-val" id="d-rx">—</div>
+            <div class="sc-sub" id="d-rx-sub">Loading...</div>
+            <div class="sc-ico"><i class="fa-solid fa-clipboard-list"></i></div>
+          </div>
+          <div class="sc" style="--sc-color:var(--amber)">
+            <div class="sc-accent"></div>
+            <div class="sc-label">Pending Queue</div>
+            <div class="sc-val" id="d-queue" style="color:var(--amber)">—</div>
+            <div class="sc-sub">Awaiting pharmacist</div>
+            <div class="sc-ico"><i class="fa-solid fa-inbox"></i></div>
+          </div>
+        </div>
+
+        <div class="card mb20">
+          <div class="sh mb16">
+            <div class="sh-l">
+              <div class="sh-title"><i class="fa-solid fa-triangle-exclamation"></i> AI Shortage Alerts</div>
+              <div class="sh-sub">Real-time ML forecast · 30-day demand model · Trained on 10,950 records</div>
+            </div>
+            <div class="sh-r">
+              <span class="badge b-cyan"><span class="bd"></span>Live DB</span>
+              <button class="btn btn-blue btn-sm" onclick="nav('analytics')"><span class="icon-inline"><i class="fa-solid fa-chart-pie"></i> Full Analytics</span></button>
+            </div>
+          </div>
+          <div id="alert-list"></div>
+        </div>
+
+        <div class="g2">
+          <div class="card">
+            <div class="sh mb16">
+              <div class="sh-l"><div class="sh-title"><i class="fa-solid fa-chart-line"></i> Weekly Sales Trend</div></div>
+              <span class="badge b-green"><i class="fa-solid fa-arrow-trend-up"></i> 12%</span>
+            </div>
+            <div class="ch"><canvas id="ch-weekly"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="sh mb16">
+              <div class="sh-l"><div class="sh-title"><i class="fa-solid fa-box-open"></i> Stock Status</div></div>
+              <span class="badge b-gray">15 drugs</span>
+            </div>
+            <div class="ch"><canvas id="ch-donut"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ QUEUE ═══════════════════════════════ -->
+      <div class="view" id="view-queue">
+        <div class="sh mb20">
+          <div class="sh-l">
+            <div class="sh-title" style="font-size:18px"><i class="fa-solid fa-inbox"></i> Approval Queue</div>
+            <div class="sh-sub">Review incoming prescriptions · AI-assisted drug extraction · Human-in-the-loop</div>
+          </div>
+          <div class="sh-r">
+            <span class="badge b-red" id="q-badge">Loading...</span>
+            <button class="btn btn-ghost btn-sm" onclick="loadQueue()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+          </div>
+        </div>
+        <div class="qgrid" id="qgrid"></div>
+        <div id="q-empty" style="display:none" class="empty card">
+          <div class="empty-ico"><i class="fa-solid fa-circle-check"></i></div>
+          <div class="empty-title">Queue is empty!</div>
+          <div class="empty-sub">All prescriptions have been reviewed.</div>
+        </div>
+      </div>
+
+      <!-- ════ DOCTOR PRESCRIPTIONS ═══════════════════ -->
+      <div class="view" id="view-doctor-prescriptions">
+        <div class="sh mb20">
+          <div class="sh-l">
+            <div class="sh-title" style="font-size:18px"><i class="fa-solid fa-file-lines"></i> Prescriptions</div>
+            <div class="sh-sub">All uploaded prescriptions for doctor review</div>
+          </div>
+          <div class="sh-r">
+            <button class="btn btn-ghost btn-sm" onclick="loadDoctorPrescriptions()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>ID</th><th>Patient</th><th>Image</th><th>Parsed Data</th><th>Status</th><th>Uploaded</th><th></th></tr></thead>
+            <tbody id="dprx-tb"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- ════ DOCTOR CHATS ═══════════════════════════ -->
+      <div class="view" id="view-doctor-chats">
+        <div class="sh mb16">
+          <div class="sh-title" style="font-size:18px"><i class="fa-solid fa-comments"></i> Chats</div>
+        </div>
+        <div class="chat-shell">
+          <div class="chat-sidebar" id="dchat-list"></div>
+          <div class="chat-area">
+            <div class="chat-header">
+              <div class="chat-av" style="background:var(--blue-100)"><i class="fa-solid fa-user"></i></div>
+              <div>
+                <div style="font-weight:700;font-size:13px" id="dchat-active-name">Select a patient</div>
+                <span class="badge b-cyan" style="margin-top:2px"><span class="bd"></span> Doctor Inbox</span>
+              </div>
+            </div>
+            <div class="chat-msgs" id="dchat-msgs"></div>
+            <div class="chat-footer">
+              <input class="chat-inp" id="dchat-inp" placeholder="Type a reply..." onkeydown="if(event.key==='Enter')sendDoctorMsg()">
+              <button class="btn btn-blue" onclick="sendDoctorMsg()">Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ DRUGS ════════════════════════════════ -->
+      <div class="view" id="view-drugs">
+        <div class="sh mb20">
+          <div class="sh-l">
+            <div class="sh-title" style="font-size:18px"><i class="fa-solid fa-pills"></i> Drug Database</div>
+            <div class="sh-sub">SFDA-matched · 400 disease-drug pairs · Live Supabase sync</div>
+          </div>
+          <div class="sh-r"><button class="btn btn-blue btn-sm" onclick="openAddDrug()">+ Add Drug</button></div>
+        </div>
+        <div class="g2 mb16">
+          <div class="card">
+            <div class="sh-title mb16" style="margin-bottom:14px">Drug Lookup</div>
+            <div class="f-group" style="margin-bottom:12px">
+              <label class="f-label">Select Drug</label>
+              <select class="f-input" id="drug-sel" onchange="lookupDrug()">
+                <option value="">— Select a drug —</option>
+              </select>
+            </div>
+            <div id="drug-detail-box"></div>
+          </div>
+          <div class="card">
+            <div class="sh-title mb16" style="margin-bottom:14px">Disease to Drug Matches <span class="badge b-violet" style="margin-left:6px">400 diseases</span></div>
+            <div class="tbl-wrap"><table>
+              <thead><tr><th>Disease</th><th>Best Match</th><th>Score</th></tr></thead>
+              <tbody id="disease-tb"></tbody>
+            </table></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="sh mb16">
+            <div class="sh-l"><div class="sh-title">All Drugs in Database</div></div>
+            <span class="badge b-cyan"><span class="bd"></span>Live</span>
+          </div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>#</th><th>Brand Name</th><th>Classification</th><th>Form</th><th>Strengths</th><th>Last Validated</th><th></th></tr></thead>
+            <tbody id="drugs-tb"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- ════ INVENTORY ════════════════════════════ -->
+      <div class="view" id="view-inventory">
+        <div class="sh mb20">
+          <div class="sh-l">
+            <div class="sh-title" style="font-size:18px"><i class="fa-solid fa-box-open"></i> Inventory Management</div>
+            <div class="sh-sub">Live stock levels · Inline editing synced to DB · AI reorder alerts</div>
+          </div>
+          <div class="sh-r">
+            <button class="btn btn-blue btn-sm" onclick="openAddStock()">+ Add Stock</button>
+            <button class="btn btn-ghost btn-sm" onclick="loadInventory()"><i class="fa-solid fa-rotate"></i> Sync DB</button>
+          </div>
+        </div>
+        <div class="sg sg-4 mb20">
+          <div class="sc" style="--sc-color:var(--red)"><div class="sc-accent"></div><div class="sc-label">Critical</div><div class="sc-val" id="iv-crit" style="color:var(--red)">—</div><div class="sc-sub">Below reorder threshold</div><div class="sc-ico"><i class="fa-solid fa-circle" style="color:#ef4444"></i></div></div>
+          <div class="sc" style="--sc-color:var(--amber)"><div class="sc-accent"></div><div class="sc-label">Expiring Soon</div><div class="sc-val" id="iv-exp" style="color:var(--amber)">—</div><div class="sc-sub">Within 90 days</div><div class="sc-ico"><i class="fa-solid fa-clock"></i></div></div>
+          <div class="sc" style="--sc-color:var(--emerald)"><div class="sc-accent"></div><div class="sc-label">Total Units</div><div class="sc-val" id="iv-total">—</div><div class="sc-sub">All drugs combined</div><div class="sc-ico"><i class="fa-solid fa-box-open"></i></div></div>
+          <div class="sc" style="--sc-color:var(--violet)"><div class="sc-accent"></div><div class="sc-label">Drug Lines</div><div class="sc-val" id="iv-lines">—</div><div class="sc-sub">Inventory records</div><div class="sc-ico"><i class="fa-solid fa-clipboard-list"></i></div></div>
+        </div>
+        <div class="card">
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Drug</th><th>Stock</th><th>Level</th><th>Reorder At</th><th>Expiry</th><th>Last Updated</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="iv-tb"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- ════ ANALYTICS ════════════════════════════ -->
+      <div class="view" id="view-analytics">
+        <div class="sh mb20">
+          <div class="sh-l">
+            <div class="sh-title" style="font-size:18px"><i class="fa-solid fa-chart-line"></i> Predictive Analytics</div>
+            <div class="sh-sub">Seasonal regression ML · 30-day forecast · 10,950 training records from your disease-drug SFDA dataset</div>
+          </div>
+          <div class="sh-r">
+            <span class="badge b-violet">Avg R² 0.28</span>
+            <button class="btn btn-ghost btn-sm" onclick="syncPredictions()"><i class="fa-solid fa-rotate"></i> Sync to DB</button>
+          </div>
+        </div>
+        <div class="sg sg-4 mb20">
+          <div class="sc" style="--sc-color:var(--red)"><div class="sc-accent"></div><div class="sc-label">Critical</div><div class="sc-val" style="color:var(--red)">5</div><div class="sc-sub">Order immediately</div></div>
+          <div class="sc" style="--sc-color:var(--amber)"><div class="sc-accent"></div><div class="sc-label">Warning</div><div class="sc-val" style="color:var(--amber)">10</div><div class="sc-sub">Order within a week</div></div>
+          <div class="sc" style="--sc-color:var(--emerald)"><div class="sc-accent"></div><div class="sc-label">OK</div><div class="sc-val" style="color:var(--emerald)">0</div><div class="sc-sub">20+ days stock</div></div>
+          <div class="sc" style="--sc-color:var(--violet)"><div class="sc-accent"></div><div class="sc-label">Next Stockout</div><div class="sc-val" style="font-size:18px;letter-spacing:0">Apr 05</div><div class="sc-sub">Amoxicillin 500mg</div></div>
+        </div>
+        <div class="card mb20">
+          <div class="sh mb16">
+            <div class="sh-l"><div class="sh-title"><i class="fa-solid fa-chart-line"></i> 30-Day Demand Forecast</div><div class="sh-sub">Historical vs Predicted daily usage</div></div>
+            <select class="f-input btn-sm" id="fc-sel" onchange="renderFcChart()" style="width:260px"></select>
+          </div>
+          <div class="ch-lg"><canvas id="ch-fc"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="sh mb16">
+            <div class="sh-l"><div class="sh-title">Full Forecast Table — All 15 Drugs</div></div>
+            <span class="badge b-cyan"><span class="bd"></span>ML Output</span>
+          </div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>#</th><th>Drug Name</th><th>Category</th><th>Stock</th><th>Daily</th><th>Days Left</th><th>Stockout</th><th>MAE</th><th>R²</th><th>Alert</th><th></th></tr></thead>
+            <tbody id="fc-tb"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- ════ REVENUE ══════════════════════════════ -->
+      <div class="view" id="view-revenue">
+        <div class="sh mb20">
+          <div class="sh-l"><div class="sh-title" style="font-size:18px"><i class="fa-solid fa-sack-dollar"></i> Revenue Dashboard</div></div>
+          <div class="sh-r"><span class="badge b-cyan"><span class="bd"></span>Supabase transactions</span></div>
+        </div>
+        <div class="g3 mb20">
+          <div class="rev-card"><div class="rev-lbl">Today's Revenue</div><div class="rev-val" id="rv-today">—</div><div class="rev-chg rev-up" id="rv-today-sub">Loading...</div></div>
+          <div class="rev-card"><div class="rev-lbl">This Month</div><div class="rev-val" id="rv-month">—</div><div class="rev-chg rev-up" id="rv-month-sub">Loading...</div></div>
+          <div class="rev-card"><div class="rev-lbl">Total Orders</div><div class="rev-val" id="rv-orders">—</div><div class="rev-chg" style="color:rgba(255,255,255,.5)">All time transactions</div></div>
+        </div>
+        <div class="g2 mb20">
+          <div class="card"><div class="sh-title mb16" style="margin-bottom:14px">Monthly Revenue (SAR)</div><div class="ch"><canvas id="ch-rev"></canvas></div></div>
+          <div class="card"><div class="sh-title mb16" style="margin-bottom:14px">Top Drugs by Volume</div><div class="ch"><canvas id="ch-top"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="sh mb16"><div class="sh-l"><div class="sh-title">Recent Transactions</div></div><span class="badge b-cyan"><span class="bd"></span>Live</span></div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>ID</th><th>Time</th><th>Drug</th><th>Qty</th><th>Type</th><th>Price (SAR)</th><th>Patient</th></tr></thead>
+            <tbody id="tx-tb"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- ════ AUDIT ════════════════════════════════ -->
+      <div class="view" id="view-audit">
+        <div class="sh mb20">
+          <div class="sh-l">
+            <div class="sh-title" style="font-size:18px"><i class="fa-solid fa-scroll"></i> Audit Logs</div>
+            <div class="sh-sub">All pharmacist actions · Timestamped · Synced from Supabase auditlogs table</div>
+          </div>
+          <div class="sh-r">
+            <select class="f-input btn-sm" id="audit-filter" onchange="loadAudit()" style="width:150px">
+              <option value="">All Actions</option>
+              <option>APPROVED</option><option>REJECTED</option>
+              <option>STOCK_UPDATE</option><option>LOGIN</option>
+            </select>
+            <button class="btn btn-ghost btn-sm" onclick="loadAudit()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+            <button class="btn btn-ghost btn-sm" onclick="exportAudit()"><i class="fa-solid fa-download"></i> Export</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Timestamp</th><th>User</th><th>Action</th><th>Details</th><th>Decision</th></tr></thead>
+            <tbody id="audit-tb"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- ════ SETTINGS ═════════════════════════════ -->
+      <div class="view" id="view-settings">
+        <div class="sh mb20"><div class="sh-title" style="font-size:18px"><i class="fa-solid fa-gear"></i> System Settings</div></div>
+        <div class="g2">
+          <div class="card">
+            <div class="sh-title mb16" style="margin-bottom:14px"><i class="fa-solid fa-plug"></i> Supabase Connection</div>
+            <div class="f-group"><label class="f-label">Project URL</label><input class="f-input" id="cfg-url" value="https://hdpbzflntprxnctucyfp.supabase.co" readonly style="opacity:.6;cursor:not-allowed"></div>
+            <div class="f-group"><label class="f-label">Anon Key (pre-configured <i class="fa-solid fa-check"></i>)</label><input class="f-input" id="cfg-key" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkcGJ6ZmxudHByeG5jdHVjeWZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzOTI4NzksImV4cCI6MjA4OTk2ODg3OX0.Uw942S1TgTwJANz6p-3VReJuB8F-0cVDOTt8SpWq02s" style="font-size:10px;font-family:'IBM Plex Mono',monospace"></div>
+            <button class="btn btn-blue btn-full" onclick="reconnectSupabase()"><i class="fa-solid fa-arrows-rotate"></i> Reconnect & Test</button>
+          </div>
+          <div class="card">
+            <div class="sh-title mb16" style="margin-bottom:14px"><i class="fa-solid fa-robot"></i> ML Model Parameters</div>
+            <div class="f-group"><label class="f-label">Forecast Horizon (days)</label><input class="f-input" id="cfg-horizon" value="30"></div>
+            <div class="f-group"><label class="f-label">Critical Alert Threshold (days)</label><input class="f-input" id="cfg-crit" value="5"></div>
+            <div class="f-group"><label class="f-label">Warning Alert Threshold (days)</label><input class="f-input" id="cfg-warn" value="10"></div>
+            <button class="btn btn-blue btn-full" onclick="toast('success','Saved','ML parameters updated.')">Save Settings</button>
+          </div>
+          <div class="card">
+            <div class="sh-title mb16" style="margin-bottom:14px"><i class="fa-solid fa-user"></i> My Profile</div>
+            <div class="f-group"><label class="f-label">Display Name</label><input class="f-input" id="cfg-dname" placeholder="Dr. Ahmed Hassan"></div>
+            <div class="f-group"><label class="f-label">New Password</label><input class="f-input" type="password" id="cfg-pass" placeholder="Leave blank to keep"></div>
+            <button class="btn btn-blue btn-full" onclick="saveProfile()">Save Profile</button>
+          </div>
+          <div class="card">
+            <div class="sh-title mb16" style="margin-bottom:14px"><i class="fa-solid fa-database"></i> Database Row Counts</div>
+            <div id="db-counts">
+              <div style="text-align:center;padding:20px;color:var(--text3)">Click below to count rows</div>
+            </div>
+            <button class="btn btn-ghost btn-full mt16" style="margin-top:12px" onclick="countAllRows()">Count All Rows</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ PATIENT HOME ═════════════════════════ -->
+      <div class="view" id="view-patient-home">
+        <div class="p-hero">
+          <h2>Good morning, <span id="p-hero-name">Patient</span> <i class="fa-solid fa-hand"></i></h2>
+          <p>Your prescriptions are managed by licensed pharmacists. All updates appear here in real-time.</p>
+        </div>
+        <div class="g3 mb20">
+          <div class="card" style="text-align:center;padding:28px;cursor:pointer" onclick="nav('upload')">
+            <div style="font-size:38px;margin-bottom:12px"><i class="fa-solid fa-file-arrow-up"></i></div>
+            <div style="font-weight:800;font-size:14px;margin-bottom:5px">Upload Prescription</div>
+            <div style="color:var(--text2);font-size:12px">Submit for pharmacist review</div>
+          </div>
+          <div class="card" style="text-align:center;padding:28px;cursor:pointer" onclick="nav('chat')">
+            <div style="font-size:38px;margin-bottom:12px"><i class="fa-solid fa-comments"></i></div>
+            <div style="font-weight:800;font-size:14px;margin-bottom:5px">Chat with Pharmacist</div>
+            <div style="color:var(--text2);font-size:12px">Real-time consultation</div>
+          </div>
+          <div class="card" style="text-align:center;padding:28px;cursor:pointer" onclick="nav('orders')">
+            <div style="font-size:38px;margin-bottom:12px"><i class="fa-solid fa-clipboard-list"></i></div>
+            <div style="font-weight:800;font-size:14px;margin-bottom:5px">Track My Orders</div>
+            <div style="color:var(--text2);font-size:12px" id="p-order-hint">Check status</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="sh mb16">
+            <div class="sh-l"><div class="sh-title">My Prescriptions</div></div>
+            <span class="badge b-cyan"><span class="bd"></span>Live</span>
+          </div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>ID</th><th>Uploaded</th><th>Status</th><th>Drug Detected</th><th>Notes</th></tr></thead>
+            <tbody id="p-rx-tb"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- ════ UPLOAD ══════════════════════════════ -->
+      <div class="view" id="view-upload">
+        <div class="g2">
+          <div class="card">
+            <div class="sh-title" style="margin-bottom:16px"><i class="fa-solid fa-file-arrow-up"></i> Upload Prescription</div>
+            <div class="upload-zone" id="uzone" onclick="document.getElementById('ffile').click()">
+              <div class="upload-ico"><i class="fa-solid fa-folder-open"></i></div>
+              <div style="font-size:14px;font-weight:700;color:var(--text)">Drag & drop here or click to browse</div>
+              <div style="font-size:12px;color:var(--text3);margin-top:5px">JPG, PNG, PDF · Max 10MB</div>
+              <div id="u-preview" style="margin-top:14px"></div>
+            </div>
+            <input type="file" id="ffile" accept="image/*,.pdf" style="display:none" onchange="handleFile(this)">
+            <div class="f-group mt16" style="margin-top:14px">
+              <label class="f-label">Notes for Pharmacist</label>
+              <textarea class="f-input" id="rx-notes" rows="3" placeholder="Drug name, dosage, allergies, special instructions..."></textarea>
+            </div>
+            <button class="btn btn-blue btn-full" onclick="submitRx()">Submit to Pharmacist Queue</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ CHAT ═════════════════════════════════ -->
+      <div class="view" id="view-chat">
+        <div class="sh-title" style="margin-bottom:16px"><i class="fa-solid fa-comments"></i> Chat with Pharmacist</div>
+        <div class="chat-shell">
+          <div class="chat-sidebar" id="chat-sidebar">
+            <div class="chat-li active" data-thread="general" onclick="selectChatDoctor('general')">
+              <div class="chat-av" style="background:var(--blue-100)"><i class="fa-solid fa-user-doctor"></i></div>
+              <div><div style="font-size:13px;font-weight:700">Pharmacist</div><div style="font-size:11.5px;color:var(--text2)">Available</div></div>
+            </div>
+            <div class="chat-li" data-thread="ahmed" onclick="selectChatDoctor('ahmed')">
+              <div class="chat-av" style="background:var(--blue-100)"><i class="fa-solid fa-user-doctor"></i></div>
+              <div><div style="font-size:13px;font-weight:700">Dr. Ahmed Hassan</div><div style="font-size:11.5px;color:var(--text2)">Senior Pharmacist</div></div>
+            </div>
+            <div class="chat-li" data-thread="sara" onclick="selectChatDoctor('sara')">
+              <div class="chat-av" style="background:var(--violet-l)"><i class="fa-solid fa-user-doctor"></i></div>
+              <div><div style="font-size:13px;font-weight:700">Dr. Sara Nabil</div><div style="font-size:11.5px;color:var(--text2)">Available</div></div>
+            </div>
+          </div>
+          <div class="chat-area">
+            <div class="chat-header">
+              <div class="chat-av" style="background:var(--blue-100)"><i class="fa-solid fa-user-doctor"></i></div>
+              <div>
+                <div style="font-weight:700;font-size:13px" id="chat-active-name">Dr. Ahmed Hassan</div>
+                <span class="badge b-green" style="margin-top:2px"><span class="bd"></span> Online</span>
+              </div>
+            </div>
+            <div class="chat-msgs" id="chat-msgs">
+            </div>
+            <div class="chat-footer">
+              <input class="chat-inp" id="chat-inp" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendMsg()">
+              <button class="btn btn-blue" onclick="sendMsg()">Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ ORDERS ═══════════════════════════════ -->
+      <div class="view" id="view-orders">
+        <div class="sh-title" style="margin-bottom:16px"><i class="fa-solid fa-clipboard-list"></i> My Orders & Status</div>
+        <div class="g2">
+          <div class="card">
+            <div style="font-size:16px;font-weight:800;margin-bottom:14px" id="orders-main-id">Order #RX-1042</div>
+            <div style="margin-bottom:16px" id="orders-main-badge"><span class="badge b-amber">Under Review</span></div>
+            <div class="tl">
+              <div class="tl-item"><div class="tl-dot done"></div><div class="tl-label">Submitted</div><div class="tl-sub" id="orders-step-submitted">Apr 02, 2026 · 9:14 AM</div></div>
+              <div class="tl-item"><div class="tl-dot cur" id="orders-step-review-dot"></div><div class="tl-label">Under Pharmacist Review</div><div class="tl-sub" id="orders-step-review">Dr. Ahmed Hassan reviewing now</div></div>
+              <div class="tl-item"><div class="tl-dot" id="orders-step-decision-dot"></div><div class="tl-label">Approved / Rejected</div><div class="tl-sub" id="orders-step-decision">Pending</div></div>
+              <div class="tl-item"><div class="tl-dot" id="orders-step-ready-dot"></div><div class="tl-label">Ready for Pickup</div><div class="tl-sub" id="orders-step-ready">Pending</div></div>
+            </div>
+            <div style="margin-top:16px;padding:14px;background:var(--gray-50);border-radius:var(--r-sm);font-size:13px;line-height:1.8;border:1.5px solid var(--border)" id="orders-main-detail">
+              <b>Drug:</b> Desloratadine 5mg · <b>Qty:</b> 30 tablets<br><b>Prescribing Dr:</b> Dr. K. El-Sayed
+            </div>
+          </div>
+          <div class="card">
+            <div style="font-size:16px;font-weight:800;margin-bottom:14px">All My Orders</div>
+            <div class="tbl-wrap"><table>
+              <thead><tr><th>Order ID</th><th>Date</th><th>Status</th><th>Drug</th></tr></thead>
+              <tbody id="orders-tb"></tbody>
+            </table></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ SYMPTOMS ═════════════════════════════ -->
+      <div class="view" id="view-symptoms">
+        <div class="card" style="max-width:580px">
+          <div style="font-size:17px;font-weight:800;margin-bottom:20px"><i class="fa-solid fa-stethoscope"></i> Request Medication Without Prescription</div>
+          <div class="form-row">
+            <div class="f-group"><label class="f-label">Full Name</label><input class="f-input" id="sym-name" placeholder="Your name"></div>
+            <div class="f-group"><label class="f-label">Age</label><input class="f-input" id="sym-age" type="number" placeholder="25"></div>
+          </div>
+          <div class="f-group"><label class="f-label">Describe Your Symptoms</label><textarea class="f-input" rows="4" id="sym-txt" placeholder="e.g. Headache, mild fever, runny nose for 2 days..."></textarea></div>
+          <div class="form-row">
+            <div class="f-group"><label class="f-label">Duration</label>
+              <select class="f-input" id="sym-duration"><option>Less than 24h</option><option>1–3 days</option><option>4–7 days</option><option>1 week+</option></select>
+            </div>
+            <div class="f-group"><label class="f-label">Known Allergies</label><input class="f-input" id="sym-allergies" placeholder="e.g. Penicillin"></div>
+          </div>
+          <button class="btn btn-blue btn-full" onclick="submitSymptoms()">Submit to Pharmacist</button>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /layout -->
+</div><!-- /app -->
+
+<script>
+/* ════════════════════════════════════════════════════
+   SUPABASE CONFIG — REAL KEY EMBEDDED
+════════════════════════════════════════════════════ */
+const SB_URL = 'https://hdpbzflntprxnctucyfp.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkcGJ6ZmxudHByeG5jdHVjeWZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzOTI4NzksImV4cCI6MjA4OTk2ODg3OX0.Uw942S1TgTwJANz6p-3VReJuB8F-0cVDOTt8SpWq02s';
+
+/* ════════════════════════════════════════════════════
+   DEMO OVERRIDE — these bypass Supabase auth completely
+════════════════════════════════════════════════════ */
+const DEMO_CREDS = {
+  'pharmacist@medivend.sa': { pass: 'Demo1234!', role: 'pharmacist', name: 'Dr. Ahmed Hassan' },
+  'patient@medivend.sa':    { pass: 'Demo1234!', role: 'patient',     name: 'Sara Al-Khalidi' },
+};
+
+/* ════════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════════ */
+let sb, currentUser, currentRole, isDemoMode = false;
+let charts = {}, fcChartObj = null, realtimeSubs = [];
+let activeChatThread = 'ahmed';
+let patientOrdersCache = [];
+let patientSeenMessageCount = {};
+let doctorPrescriptionsCache = [];
+let doctorChatsCache = [];
+let doctorChatSelected = null;
+let cachedDoctorChatCount = 0;
+/** When signed in live (not explicit demo sandbox), merged rows from `/api/predictions` + inventory */
+let liveFc = null;
+let cachedPendingCount = 0;
+/** Last `/api/drugs/` response for lookups (live mode) */
+let cachedDrugRows = [];
+
+function usesLiveBackend() {
+  return !isDemoMode;
+}
+
+async function apiGet(path) {
+  const r = await fetch(path, { headers: { Accept: 'application/json' } });
+  const t = await r.text();
+  if (!r.ok) throw new Error(t || r.statusText);
+  if (!t) return null;
+  return JSON.parse(t);
+}
+
+async function apiJson(method, path, body) {
+  const r = await fetch(path, {
+    method,
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: body != null ? JSON.stringify(body) : undefined,
+  });
+  const t = await r.text();
+  if (!r.ok) throw new Error(t || r.statusText);
+  if (!t) return {};
+  try {
+    return JSON.parse(t);
+  } catch (_) {
+    return {};
+  }
+}
+
+function deriveAlertLevel(daysRemaining) {
+  if (daysRemaining <= 5) return 'CRITICAL';
+  if (daysRemaining <= 10) return 'WARNING';
+  return 'OK';
+}
+
+function buildLiveForecastRows(predWrap, invRows) {
+  const invBy = {};
+  (invRows || []).forEach((r) => {
+    invBy[r.drug_id] = r;
+  });
+  const preds = predWrap?.predictions ?? predWrap ?? [];
+  if (!Array.isArray(preds) || !preds.length) return [];
+  return preds.map((pred) => {
+    const inv = invBy[pred.drug_id];
+    const d = pred.drugs || {};
+    const brand = (d.brand_names || '').trim();
+    const nameGuess =
+      brand.split(',')[0]?.trim() || `Drug #${pred.drug_id}`;
+    const stock = Number(
+      inv?.quantity_in_stock ?? pred.current_stock ?? 0,
+    );
+    const pd = Number(pred.predicted_demand ?? 0);
+    const daily = pd > 0 ? pd / 30 : 0.05;
+    const daysRemaining = daily > 0.01 ? stock / daily : 999;
+    const sod =
+      typeof pred.predicted_stock_out_date === 'string'
+        ? pred.predicted_stock_out_date.split('T')[0]
+        : '';
+    const lvl = deriveAlertLevel(daysRemaining);
+    return {
+      drug_id: pred.drug_id,
+      drug_name: nameGuess,
+      trade_name: brand || nameGuess,
+      category: d.classification || '—',
+      current_stock: stock,
+      predicted_daily_usage: Math.round(daily * 100) / 100,
+      days_remaining: Math.round(daysRemaining * 10) / 10,
+      stock_out_date: sod,
+      alert_level: lvl,
+      model_mae: Number(pred.model_mae ?? 2),
+      model_r2: Number(pred.confidence_score ?? 0),
+      forecast_30d: Array.from({ length: 30 }, (_, i) =>
+        daily * (1 + ((i % 7) * 0.015)),
+      ),
+    };
+  });
+}
+
+function inventoryFallbackForecast(invRows) {
+  return (invRows || []).map((r) => {
+    const bn = r.drugs?.brand_names || `Drug #${r.drug_id}`;
+    const name = bn.split(',')[0].trim() || bn;
+    const qty = Number(r.quantity_in_stock ?? 0);
+    const rt = Number(r.reorder_threshold ?? 20);
+    const daily = qty > 0 ? Math.max(0.05, qty / Math.max(rt * 14, 30)) : 0.05;
+    const daysRemaining = qty / daily;
+    return {
+      drug_id: r.drug_id,
+      drug_name: name,
+      trade_name: bn,
+      category: r.drugs?.classification || '—',
+      current_stock: qty,
+      predicted_daily_usage: Math.round(daily * 100) / 100,
+      days_remaining: Math.round(daysRemaining * 10) / 10,
+      stock_out_date: '',
+      alert_level: deriveAlertLevel(daysRemaining),
+      model_mae: 0,
+      model_r2: 0,
+      forecast_30d: Array(30).fill(daily),
+    };
+  });
+}
+
+async function refreshLiveForecastData() {
+  if (!usesLiveBackend()) {
+    liveFc = null;
+    return;
+  }
+  try {
+    const [predWrap, inv] = await Promise.all([
+      apiGet('/api/predictions/'),
+      apiGet('/api/inventory/'),
+    ]);
+    liveFc = buildLiveForecastRows(predWrap, inv);
+    if (!liveFc.length && Array.isArray(inv) && inv.length)
+      liveFc = inventoryFallbackForecast(inv);
+  } catch (e) {
+    console.warn('refreshLiveForecastData', e);
+    liveFc = null;
+  }
+}
+
+function getForecastRows() {
+  if (usesLiveBackend()) return liveFc || [];
+  return FC;
+}
+
+async function loadSalesHistoryForCharts(days = 14) {
+  try {
+    return await apiGet(
+      `/api/analytics/sales-history?days=${encodeURIComponent(days)}`,
+    );
+  } catch (_) {
+    return [];
+  }
+}
+const chatThreads = {
+  general: { name: 'Pharmacist', messages: [] },
+  ahmed: { name: 'Dr. Ahmed Hassan', messages: [] },
+  sara: { name: 'Dr. Sara Nabil', messages: [] },
+};
+
+/* ════════════════════════════════════════════════════
+   ML FORECAST DATA
+════════════════════════════════════════════════════ */
+const FC = [{"drug_id":1,"drug_name":"Multivitamins Syrup","trade_name":"Junior Syrup w/ Royal Jelly","category":"Supplement","current_stock":145,"predicted_daily_usage":21.1,"days_remaining":6.9,"stock_out_date":"2026-04-09","alert_level":"WARNING","model_mae":2.74,"model_r2":0.332,"forecast_30d":[21.2,21.2,21.3,21.3,21.2,21.2,21.2,21.2,21.2,21.2,21.2,21.2,21.2,21.2,21.1,21.1,21.2,21.2,21.1,21.1,21.1,21.1,21.1,21.2,21.2,21.1,21.1,21.1,21.1,20.5]},{"drug_id":2,"drug_name":"Urea 10% Cream","trade_name":"Eucerin Urea Repair","category":"Dermatology","current_stock":88,"predicted_daily_usage":14.8,"days_remaining":5.9,"stock_out_date":"2026-04-08","alert_level":"WARNING","model_mae":1.91,"model_r2":0.441,"forecast_30d":[14.6,14.6,15.2,15.1,14.9,14.8,14.7,14.6,14.6,15.2,15.1,14.8,14.8,14.7,14.6,14.5,15.1,15.1,14.8,14.7,14.7,14.6,14.5,15.1,15.0,14.8,14.7,14.6,14.5,16.1]},{"drug_id":3,"drug_name":"FreeStyle Libre Reader","trade_name":"FreeStyle Libre 2 Reader","category":"Diabetes Device","current_stock":22,"predicted_daily_usage":3.5,"days_remaining":6.2,"stock_out_date":"2026-04-08","alert_level":"WARNING","model_mae":0.57,"model_r2":0.013,"forecast_30d":[3.6,3.6,3.5,3.5,3.6,3.6,3.6,3.6,3.6,3.5,3.5,3.5,3.5,3.5,3.5,3.6,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.6]},{"drug_id":4,"drug_name":"FreeStyle Libre Sensor","trade_name":"FreeStyle Libre 2 Sensor","category":"Diabetes Device","current_stock":55,"predicted_daily_usage":11.8,"days_remaining":4.7,"stock_out_date":"2026-04-07","alert_level":"CRITICAL","model_mae":1.41,"model_r2":0.019,"forecast_30d":[11.7,11.8,11.6,11.7,11.5,11.6,11.7,11.8,11.9,11.7,11.8,11.5,11.6,11.7,11.8,11.9,11.8,11.9,11.6,11.7,11.8,11.9,12.0,11.9,12.0,11.7,11.8,11.9,12.0,11.8]},{"drug_id":5,"drug_name":"Activated Charcoal Powder","trade_name":"VitaThrive Charcoal","category":"Gastro","current_stock":67,"predicted_daily_usage":8.7,"days_remaining":7.7,"stock_out_date":"2026-04-10","alert_level":"WARNING","model_mae":1.2,"model_r2":0.063,"forecast_30d":[8.9,8.9,8.8,8.8,8.9,8.9,8.9,8.8,8.8,8.7,8.7,8.8,8.8,8.8,8.8,8.7,8.6,8.6,8.7,8.7,8.7,8.7,8.7,8.5,8.5,8.6,8.6,8.6,8.6,9.0]},{"drug_id":6,"drug_name":"Calamine Lotion 8%","trade_name":"Calarose Lotion","category":"Dermatology","current_stock":102,"predicted_daily_usage":11.5,"days_remaining":8.9,"stock_out_date":"2026-04-11","alert_level":"WARNING","model_mae":1.57,"model_r2":0.394,"forecast_30d":[11.6,11.7,11.3,11.3,11.5,11.5,11.5,11.6,11.6,11.3,11.3,11.4,11.4,11.5,11.5,11.6,11.2,11.2,11.3,11.4,11.4,11.5,11.5,11.1,11.2,11.3,11.3,11.4,11.4,12.8]},{"drug_id":7,"drug_name":"BD Insulin Pen Needle 4mm","trade_name":"BD Microfine Pen Needle","category":"Diabetes","current_stock":210,"predicted_daily_usage":27.5,"days_remaining":7.6,"stock_out_date":"2026-04-10","alert_level":"WARNING","model_mae":3.31,"model_r2":0.017,"forecast_30d":[27.5,27.5,27.7,27.7,27.5,27.5,27.5,27.4,27.4,27.7,27.7,27.4,27.4,27.4,27.4,27.4,27.7,27.7,27.4,27.4,27.4,27.4,27.4,27.7,27.6,27.4,27.4,27.4,27.4,27.5]},{"drug_id":8,"drug_name":"Desloratadine 5mg","trade_name":"Deslin 5mg Film-coated","category":"Allergy","current_stock":134,"predicted_daily_usage":26.1,"days_remaining":5.1,"stock_out_date":"2026-04-07","alert_level":"WARNING","model_mae":3.34,"model_r2":0.329,"forecast_30d":[26.3,26.2,26.7,26.6,26.3,26.2,26.2,26.1,26.0,26.5,26.5,26.1,26.0,26.0,25.9,25.9,26.3,26.3,25.9,25.9,25.8,25.7,25.7,26.2,26.1,25.7,25.7,25.6,25.6,26.4]},{"drug_id":9,"drug_name":"Zinc Oxide 15% Cream","trade_name":"Diaper Rash Cream Plus","category":"Dermatology","current_stock":79,"predicted_daily_usage":13.5,"days_remaining":5.9,"stock_out_date":"2026-04-08","alert_level":"WARNING","model_mae":1.88,"model_r2":0.42,"forecast_30d":[13.4,13.3,13.4,13.4,13.4,13.4,13.4,13.4,13.4,13.4,13.4,13.4,13.4,13.4,13.4,13.4,13.5,13.4,13.5,13.4,13.4,13.4,13.4,13.5,13.4,13.5,13.4,13.4,13.4,14.7]},{"drug_id":10,"drug_name":"Diosmin 500mg","trade_name":"Capillo Film-coated","category":"Vascular","current_stock":43,"predicted_daily_usage":9.8,"days_remaining":4.4,"stock_out_date":"2026-04-06","alert_level":"CRITICAL","model_mae":1.28,"model_r2":0.01,"forecast_30d":[9.9,10.0,9.8,9.9,9.6,9.7,9.8,9.9,10.0,9.8,9.9,9.6,9.7,9.8,9.9,10.0,9.8,9.9,9.6,9.7,9.8,9.9,10.0,9.8,9.9,9.6,9.7,9.8,9.9,10.0]},{"drug_id":11,"drug_name":"Perampanel 2mg","trade_name":"Fycompa 2mg","category":"Neurology","current_stock":18,"predicted_daily_usage":4.8,"days_remaining":3.8,"stock_out_date":"2026-04-06","alert_level":"CRITICAL","model_mae":0.7,"model_r2":0.023,"forecast_30d":[4.8,4.8,4.9,4.9,4.9,4.8,4.8,4.8,4.8,4.9,4.8,4.8,4.8,4.8,4.7,4.7,4.8,4.8,4.8,4.8,4.7,4.7,4.7,4.8,4.8,4.7,4.7,4.7,4.7,4.9]},{"drug_id":12,"drug_name":"Accu-Chek Test Strips","trade_name":"Accu-Chek Instant Strips","category":"Diabetes","current_stock":95,"predicted_daily_usage":20.9,"days_remaining":4.5,"stock_out_date":"2026-04-07","alert_level":"CRITICAL","model_mae":2.59,"model_r2":0.018,"forecast_30d":[21.5,21.5,21.2,21.2,21.2,21.2,21.2,21.2,21.3,20.9,20.9,20.9,20.9,20.9,21.0,21.0,20.6,20.7,20.6,20.6,20.7,20.7,20.7,20.4,20.4,20.3,20.4,20.4,20.4,21.6]},{"drug_id":13,"drug_name":"Panadol 500mg","trade_name":"Panadol Extra","category":"Analgesic","current_stock":312,"predicted_daily_usage":40.7,"days_remaining":7.7,"stock_out_date":"2026-04-10","alert_level":"WARNING","model_mae":4.66,"model_r2":0.533,"forecast_30d":[40.7,40.3,41.8,41.5,41.5,41.2,40.8,40.5,40.2,41.7,41.4,41.3,41.0,40.7,40.4,40.0,41.5,41.2,41.1,40.8,40.5,40.2,39.8,41.3,41.0,40.9,40.6,40.3,39.9,36.5]},{"drug_id":14,"drug_name":"Amoxicillin 500mg","trade_name":"Amoxil 500mg Capsules","category":"Antibiotic","current_stock":56,"predicted_daily_usage":18.6,"days_remaining":3.0,"stock_out_date":"2026-04-05","alert_level":"CRITICAL","model_mae":2.04,"model_r2":0.471,"forecast_30d":[18.7,18.8,18.8,18.9,18.4,18.5,18.6,18.7,18.8,18.8,18.9,18.4,18.5,18.6,18.7,18.8,18.8,18.9,18.4,18.5,18.6,18.7,18.8,18.8,18.9,18.4,18.5,18.6,18.7,17.5]},{"drug_id":15,"drug_name":"Ibuprofen 400mg","trade_name":"Brufen 400mg","category":"Analgesic","current_stock":178,"predicted_daily_usage":30.6,"days_remaining":5.8,"stock_out_date":"2026-04-08","alert_level":"WARNING","model_mae":3.67,"model_r2":0.46,"forecast_30d":[30.3,30.4,30.2,30.3,30.2,30.3,30.4,30.6,30.7,30.5,30.6,30.5,30.6,30.7,30.8,30.9,30.7,30.9,30.8,30.9,31.0,31.1,31.2,31.0,31.1,31.0,31.1,31.3,31.4,27.6]}];
+
+const DISEASES = [["Panic Disorder","Urea 10% Cream",0.91],["Cellulitis","Amoxicillin 500mg",0.96],["Headache after LP","Panadol 500mg",0.95],["Fracture","Ibuprofen 400mg",0.94],["Atrophic Vaginitis","Urea 10% Cream",0.89],["Cryptorchidism","FreeStyle Libre 2 Reader",0.78],["Turner Syndrome","Perampanel 2mg",0.77],["Vocal Cord Polyp","Multivitamins Syrup",0.82],["Eye Alignment Disorder","Calamine Lotion 8%",0.75],["Pyloric Stenosis","Activated Charcoal Powder",0.80],["Adenoid Cystic Carcinoma","Diosmin 500mg",0.73],["Pleomorphic Adenoma","BD Insulin Pen Needle 4mm",0.71]];
+
+/* ════════════════════════════════════════════════════
+   SUPABASE INIT
+════════════════════════════════════════════════════ */
+function initSB(url, key) {
+  try {
+    sb = supabase.createClient(url || SB_URL, key || SB_KEY);
+    return true;
+  } catch(e) { console.error('SB init failed:', e); return false; }
+}
+
+/* ════════════════════════════════════════════════════
+   AUTH — LOGIN
+════════════════════════════════════════════════════ */
+function switchTab(t) {
+  document.getElementById('tab-in').classList.toggle('active', t==='in');
+  document.getElementById('tab-up').classList.toggle('active', t==='up');
+  document.getElementById('form-in').style.display = t==='in' ? '' : 'none';
+  document.getElementById('form-up').style.display = t==='up' ? '' : 'none';
+  clearMessages();
+}
+
+function fillDemo(email, pass) {
+  document.getElementById('li-email').value = email;
+  document.getElementById('li-pass').value = pass;
+  clearMessages();
+}
+
+function showErr(msg) {
+  const el = document.getElementById('login-err');
+  el.textContent = msg; el.style.display = 'block';
+  document.getElementById('login-ok').style.display = 'none';
+}
+function showOk(msg) {
+  const el = document.getElementById('login-ok');
+  el.textContent = msg; el.style.display = 'block';
+  document.getElementById('login-err').style.display = 'none';
+}
+function clearMessages() {
+  document.getElementById('login-err').style.display = 'none';
+  document.getElementById('login-ok').style.display = 'none';
+}
+
+function setLoginLoading(loading) {
+  document.getElementById('li-label').style.display = loading ? 'none' : '';
+  document.getElementById('li-spin').style.display  = loading ? 'inline-block' : 'none';
+  document.getElementById('li-btn').disabled = loading;
+}
+
+async function doLogin() {
+  const email = document.getElementById('li-email').value.trim().toLowerCase();
+  const pass  = document.getElementById('li-pass').value;
+  if (!email || !pass) { showErr('Please enter your email and password.'); return; }
+
+  clearMessages();
+  setLoginLoading(true);
+
+  // Database auth only.
+  try {
+    if (!sb) initSB();
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+
+    if (error) {
+      // Common error messages made user-friendly
+      if (error.message.includes('Invalid login')) {
+        showErr('Incorrect email or password.');
+      } else if (error.message.includes('Email not confirmed')) {
+        showErr('Please confirm your email first. Check your inbox.');
+      } else {
+        showErr(error.message);
+      }
+      setLoginLoading(false);
+      return;
+    }
+
+    const user = data.user;
+    // Try to get role from user metadata first
+    let role = user.user_metadata?.role || null;
+    let name = user.user_metadata?.username || user.email.split('@')[0];
+
+    // Then try public.users table (match by username/email)
+    if (!role) {
+      try {
+        const { data: udata } = await sb.from('users')
+          .select('role, username')
+          .ilike('username', email.split('@')[0])
+          .single();
+        if (udata) { role = udata.role; name = udata.username; }
+      } catch(e) {}
+    }
+
+    role = role || 'patient';
+    setLoginLoading(false);
+    enterApp(name, role, false);
+
+  } catch(e) {
+    showErr('Connection error: ' + (e?.message || e));
+    setLoginLoading(false);
+  }
+}
+
+async function doRegister() {
+  const name  = document.getElementById('ru-name').value.trim();
+  const role  = document.getElementById('ru-role').value;
+  const email = document.getElementById('ru-email').value.trim().toLowerCase();
+  const pass  = document.getElementById('ru-pass').value;
+
+  if (!name || !email || !pass) { showErr('Please fill in all fields.'); return; }
+  if (pass.length < 6) { showErr('Password must be at least 6 characters.'); return; }
+
+  document.getElementById('ru-label').style.display='none';
+  document.getElementById('ru-spin').style.display='inline-block';
+  document.getElementById('ru-btn').disabled=true;
+
+  try {
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ email, password: pass, username: name, role }),
+    });
+    const txt = await res.text();
+    if (!res.ok) { showErr(txt || 'Registration failed'); return; }
+    showOk('Account created. You can sign in immediately.');
+    switchTab('in');
+
+  } catch(e) {
+    showErr('Registration failed: ' + e.message);
+  } finally {
+    document.getElementById('ru-label').style.display='';
+    document.getElementById('ru-spin').style.display='none';
+    document.getElementById('ru-btn').disabled=false;
+  }
+}
+
+function demoMode() {
+  isDemoMode = false;
+  toast('warning', 'Demo disabled', 'This build uses database-backed data only.');
+}
+
+/* ════════════════════════════════════════════════════
+   ENTER APP
+════════════════════════════════════════════════════ */
+function enterApp(name, role, demo) {
+  try {
+    isDemoMode = demo;
+    const r = (role || '').toLowerCase();
+    currentRole = r === 'patient' ? 'patient' : (r === 'doctor' ? 'doctor' : 'pharmacist');
+    currentUser = { name, role: currentRole };
+
+    document.getElementById('login-screen').style.display = 'none';
+    document.body.classList.add('mv-signed-in');
+    document.getElementById('app-screen').style.display   = 'block';
+
+    // Sidebar user
+    document.getElementById('sb-name').textContent   = name || 'User';
+    document.getElementById('sb-role').textContent   = currentRole.charAt(0).toUpperCase()+currentRole.slice(1);
+    document.getElementById('sb-avatar').textContent = (name || 'User').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+
+    buildNav(currentRole);
+    updateConnStatus(demo ? 'demo' : 'live');
+
+    if (!demo && sb) {
+      setupRealtime();
+      logAction('LOGIN', { user: name, role: currentRole });
+    }
+
+    const startView = currentRole === 'patient' ? 'patient-home' : (currentRole === 'doctor' ? 'doctor-prescriptions' : 'dashboard');
+    setTimeout(async () => {
+      try {
+        await loadAllData();
+        nav(startView);
+        ensureVisibleAppView();
+      } catch (e) {
+        // Never leave the user with a blank screen.
+        const fallback = document.getElementById('view-dashboard') ? 'dashboard' : 'patient-home';
+        nav(fallback);
+        toast('warning', 'Recovered view', 'A startup issue occurred; loaded fallback dashboard.');
+      }
+    }, 80);
+  } catch (e) {
+    document.body.classList.remove('mv-signed-in');
+    document.getElementById('app-screen').style.display = 'none';
+    document.getElementById('login-screen').style.display = '';
+    showErr('UI failed to initialize: ' + (e?.message || e));
+  }
+}
+
+function ensureVisibleAppView() {
+  const app = document.getElementById('app-screen');
+  if (!app) return;
+  if (window.getComputedStyle(app).display === 'none') app.style.display = 'block';
+  const activeViews = document.querySelectorAll('.view.active');
+  if (activeViews.length > 0) return;
+  const fallbackId = currentRole === 'patient' ? 'patient-home' : 'dashboard';
+  const fallbackView = document.getElementById('view-' + fallbackId) || document.querySelector('.view');
+  if (fallbackView) {
+    fallbackView.classList.add('active');
+    document.getElementById('page-title').textContent = PAGE_TITLES[fallbackId] || 'Dashboard';
+    document.querySelectorAll('.sb-item').forEach(i => {
+      i.classList.toggle('active', i.dataset.id === fallbackId);
+    });
+  }
+}
+
+async function doLogout() {
+  realtimeSubs.forEach(s => { try { s.unsubscribe?.(); } catch(e){} });
+  realtimeSubs = [];
+  destroyAllCharts();
+  if (sb && !isDemoMode) { try { await sb.auth.signOut(); } catch(e){} }
+  document.body.classList.remove('mv-signed-in');
+  document.getElementById('login-screen').style.display = '';
+  document.getElementById('app-screen').style.display   = 'none';
+  currentUser = null; isDemoMode = false;
+  clearMessages();
+}
+
+/* ════════════════════════════════════════════════════
+   NAV
+════════════════════════════════════════════════════ */
+const ADMIN_ITEMS = [
+  {sec:'Overview'},
+  {id:'dashboard', icon:'<i class="fa-solid fa-chart-pie"></i>', label:'Dashboard'},
+  {sec:'Pharmacy'},
+  {id:'queue',     icon:'<i class="fa-solid fa-inbox"></i>', label:'Approval Queue',   badge:'q'},
+  {id:'doctor-prescriptions', icon:'<i class="fa-solid fa-file-lines"></i>', label:'Prescriptions Inbox'},
+  {id:'doctor-chats',         icon:'<i class="fa-solid fa-comments"></i>', label:'Patient Chats', badge:'dchat'},
+  {id:'drugs',     icon:'<i class="fa-solid fa-pills"></i>', label:'Drug Database'},
+  {id:'inventory', icon:'<i class="fa-solid fa-box-open"></i>', label:'Inventory'},
+  {sec:'Intelligence'},
+  {id:'analytics', icon:'<i class="fa-solid fa-chart-line"></i>', label:'Predictive Analytics'},
+  {id:'revenue',   icon:'<i class="fa-solid fa-sack-dollar"></i>', label:'Revenue'},
+  {sec:'System'},
+  {id:'audit',     icon:'<i class="fa-solid fa-scroll"></i>', label:'Audit Logs'},
+  {id:'settings',  icon:'<i class="fa-solid fa-gear"></i>', label:'Settings'},
+];
+const DOCTOR_ITEMS = [
+  {sec:'Doctor'},
+  {id:'doctor-prescriptions', icon:'<i class="fa-solid fa-file-lines"></i>', label:'Prescriptions'},
+  {id:'doctor-chats',         icon:'<i class="fa-solid fa-comments"></i>', label:'Chats', badge:'dchat'},
+];
+const PATIENT_ITEMS = [
+  {sec:'My Portal'},
+  {id:'patient-home', icon:'<i class="fa-solid fa-house"></i>', label:'Home'},
+  {id:'upload',       icon:'<i class="fa-solid fa-file-arrow-up"></i>', label:'Upload Prescription'},
+  {id:'chat',         icon:'<i class="fa-solid fa-comments"></i>', label:'Chat with Pharmacist'},
+  {id:'symptoms',     icon:'<i class="fa-solid fa-stethoscope"></i>', label:'Symptom Request'},
+  {id:'orders',       icon:'<i class="fa-solid fa-clipboard-list"></i>', label:'My Orders'},
+];
+
+let __sidebarNavDelegation = false;
+function wireSidebarNavOnce() {
+  if (__sidebarNavDelegation) return;
+  const navRoot = document.getElementById('sb-nav');
+  if (!navRoot) return;
+  __sidebarNavDelegation = true;
+  navRoot.addEventListener('click', (e) => {
+    const btn = e.target.closest('.sb-item[data-id]');
+    if (!btn || !navRoot.contains(btn)) return;
+    const id = btn.dataset.id;
+    if (!id) return;
+    e.preventDefault();
+    nav(id);
+  });
+}
+
+function buildNav(role) {
+  wireSidebarNavOnce();
+  const items = role === 'patient' ? PATIENT_ITEMS : (role === 'doctor' ? DOCTOR_ITEMS : ADMIN_ITEMS);
+  const navRoot = document.getElementById('sb-nav');
+  navRoot.innerHTML = '';
+  items.forEach(it => {
+    if (it.sec) {
+      navRoot.innerHTML += `<div class="sb-section-lbl">${it.sec}</div>`;
+    } else {
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'sb-item';
+      el.dataset.id = it.id;
+      el.setAttribute('aria-label', it.label);
+      el.innerHTML = `<span class="sb-icon">${it.icon}</span><span>${it.label}</span>${it.badge ? `<span class="sb-badge" id="badge-${it.badge}">5</span>` : ''}`;
+      navRoot.appendChild(el);
+    }
+  });
+}
+
+const PAGE_TITLES = {
+  dashboard:'Dashboard Overview', queue:'Approval Queue', drugs:'Drug Database',
+  inventory:'Inventory Management', analytics:'Predictive Analytics', revenue:'Revenue Dashboard',
+  audit:'Audit Logs', settings:'System Settings',
+  'doctor-prescriptions':'Prescriptions Inbox', 'doctor-chats':'Patient Chats',
+  'patient-home':'Patient Portal', upload:'Upload Prescription',
+  chat:'Chat with Pharmacist', symptoms:'Symptom Request', orders:'My Orders'
+};
+
+function nav(id) {
+  const requested = id;
+  let v = document.getElementById('view-' + requested);
+  if (!v) {
+    const fallbackId = currentRole === 'patient' ? 'patient-home' : 'dashboard';
+    v = document.getElementById('view-' + fallbackId) || document.querySelector('.view');
+    id = v?.id?.replace('view-', '') || fallbackId;
+  }
+  document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+  if (v) v.classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(i => { if (i.dataset.id === id) i.classList.add('active'); });
+  document.getElementById('page-title').textContent = PAGE_TITLES[id] || id || requested;
+
+  setTimeout(() => {
+    try {
+      if (id==='dashboard') {
+        loadDashboard(); loadAlerts(); buildNotifications();
+        initDashCharts().catch((e)=>console.warn(e));
+      }
+      if (id==='queue')        loadQueue();
+      if (id==='drugs')        loadDrugs();
+      if (id==='inventory')    loadInventory();
+      if (id==='analytics') {
+        if (usesLiveBackend()) refreshLiveForecastData().then(() => { renderFcTable(); renderFcChart(); populateFcSel(); });
+        else { renderFcTable(); renderFcChart(); populateFcSel(); }
+      }
+      if (id==='revenue')      { loadRevenue(); initRevCharts(); }
+      if (id==='audit')        loadAudit();
+      if (id==='patient-home') loadPatientHome();
+      if (id==='upload')       loadUploadView();
+      if (id==='chat')         loadChatView();
+      if (id==='orders')       loadOrdersView();
+      if (id==='symptoms')     loadSymptomsView();
+      if (id==='settings')     loadSettingsView();
+      if (id==='doctor-prescriptions') loadDoctorPrescriptions();
+      if (id==='doctor-chats')         loadDoctorChats();
+      ensureVisibleAppView();
+    } catch (e) {
+      toast('error', 'View load error', e?.message || 'Failed to load this view');
+      ensureVisibleAppView();
+    }
+  }, 60);
+}
+
+/* ════════════════════════════════════════════════════
+   REALTIME
+════════════════════════════════════════════════════ */
+function setupRealtime() {
+  if (!sb || isDemoMode) return;
+  try {
+    const ch = sb.channel('medivend-rt')
+      .on('postgres_changes', {event:'INSERT',schema:'public',table:'prescriptions'}, () => {
+        toast('info','New Prescription','A patient uploaded a prescription');
+        loadQueue(); loadDashboard().then(()=>buildNotifications());
+      })
+      .on('postgres_changes', {event:'*',schema:'public',table:'inventory'}, () => {
+        toast('info','Inventory Updated','Stock levels changed');
+        loadInventory();
+      })
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          updateConnStatus('live');
+          document.getElementById('rt-text').textContent = 'Live DB';
+        }
+      });
+    realtimeSubs.push(ch);
+  } catch(e) { console.warn('Realtime setup failed:', e); }
+}
+
+function updateConnStatus(status) {
+  const el = document.getElementById('sb-conn-status');
+  const pill = document.getElementById('rt-pill');
+  const statuses = {
+    live:   { cls:'live',    txt:'<i class="fa-solid fa-circle" style="color:#10b981"></i> Live — backend API', pill:'Live' },
+    demo:   { cls:'demo',    txt:'<i class="fa-solid fa-bolt"></i> Demo Mode',        pill:'Demo' },
+    offline:{ cls:'offline', txt:'<i class="fa-solid fa-circle" style="color:#ef4444"></i> Offline',          pill:'Offline' }
+  };
+  const s = statuses[status] || statuses.demo;
+  el.className = 'sb-conn ' + s.cls;
+  el.innerHTML = `<span class="sb-conn-dot"></span> ${s.txt}`;
+  document.getElementById('rt-text').textContent = s.pill;
+}
+
+/* ════════════════════════════════════════════════════
+   DATA LOADERS
+════════════════════════════════════════════════════ */
+async function loadAllData() {
+  if (currentRole === 'patient') return;
+  if (usesLiveBackend()) await refreshLiveForecastData();
+  else liveFc = null;
+  refreshDoctorChatBadge();
+}
+
+async function loadDashboard() {
+  if (isDemoMode) {
+    demoStats();
+    cachedPendingCount = 5;
+    return;
+  }
+  try {
+    const sum = await apiGet('/api/prescriptions/stats/summary');
+    const pend = Number(sum.pending_count ?? 0);
+    const up = Number(sum.uploaded_today_count ?? 0);
+    cachedPendingCount = pend;
+    document.getElementById('d-rx').textContent = String(up);
+    document.getElementById('d-rx-sub').textContent = 'Uploaded today';
+    document.getElementById('d-queue').textContent = String(pend);
+    const b = document.getElementById('badge-q');
+    if (b) b.textContent = String(pend);
+    const qb = document.getElementById('q-badge');
+    if (qb) qb.textContent = pend + ' Pending';
+    document.getElementById('d-drugs').textContent = String(getForecastRows().length);
+    refreshDoctorChatBadge();
+    buildNotifications();
+  } catch (e) {
+    cachedPendingCount = 0;
+    document.getElementById('d-rx').textContent = '0';
+    document.getElementById('d-queue').textContent = '0';
+    document.getElementById('d-rx-sub').textContent = 'Could not reach API';
+    document.getElementById('d-drugs').textContent = String(getForecastRows().length);
+    toast('error', 'Dashboard', String(e.message || e).slice(0, 140));
+    buildNotifications();
+  }
+}
+
+function demoStats() {
+  document.getElementById('d-rx').textContent    = '23';
+  document.getElementById('d-rx-sub').textContent = '12% higher than yesterday';
+  document.getElementById('d-queue').textContent  = '5';
+  const b = document.getElementById('badge-q');
+  if (b) b.textContent = '5';
+  if (document.getElementById('q-badge')) document.getElementById('q-badge').textContent = '5 Pending';
+  const dd = document.getElementById('d-drugs');
+  if (dd) dd.textContent = String(FC.length);
+  buildNotifications();
+}
+
+function loadAlerts() {
+  const fc = getForecastRows();
+  const critical = fc.filter(f=>f.alert_level==='CRITICAL');
+  const warning  = fc.filter(f=>f.alert_level==='WARNING').slice(0,3);
+  document.getElementById('d-critical').textContent = critical.length;
+
+  document.getElementById('alert-list').innerHTML = [...critical,...warning].map(d => {
+    const cls = d.alert_level==='CRITICAL' ? 'critical' : 'warning';
+    const ico = d.alert_level==='CRITICAL' ? '<i class="fa-solid fa-circle" style="color:#ef4444"></i>' : '<i class="fa-solid fa-circle" style="color:#f59e0b"></i>';
+    const dateLbl = d.stock_out_date ? d.stock_out_date : 'estimate';
+    return `<div class="al-row ${cls}">
+      <div class="al-ico">${ico}</div>
+      <div class="al-body">
+        <div class="al-title">${d.drug_name} — ${d.alert_level}: ~${Math.round(d.days_remaining * 10) / 10} d to stock risk (${dateLbl})</div>
+        <div class="al-sub">Current stock: ${d.current_stock} units · Predicted daily: ${d.predicted_daily_usage}/day · MAE ±${d.model_mae}</div>
+      </div>
+      <button class="btn ${d.alert_level==='CRITICAL'?'btn-red':'btn-amber'} btn-sm" onclick="orderNow(${d.drug_id})">${d.alert_level==='CRITICAL'?'Order Now':'Schedule'}</button>
+    </div>`;
+  }).join('');
+}
+
+async function loadQueue() {
+  let rows = [];
+  if (isDemoMode) rows = demoQueue();
+  else {
+    try {
+      rows = await apiGet('/api/prescriptions/?status=pending&limit=50') || [];
+    } catch (e) {
+      rows = [];
+      toast('error', 'Queue', String(e.message || e).slice(0, 140));
+    }
+  }
+
+  const grid = document.getElementById('qgrid');
+  const empty = document.getElementById('q-empty');
+  document.getElementById('q-badge').textContent = rows.length + ' Pending';
+  const b = document.getElementById('badge-q');
+  if (b) b.textContent = rows.length;
+
+  if (!rows.length) { grid.innerHTML=''; empty.style.display=''; return; }
+  empty.style.display='none';
+  
+  // Fetch image URLs for prescriptions with images
+  for (const r of rows) {
+    if (r.image_storage_path && !isDemoMode) {
+      try {
+        const imgData = await apiGet(`/api/prescriptions/${r.prescription_id}/image-url`);
+        r.image_url = imgData.url;
+      } catch (e) {
+        r.image_url = null;
+      }
+    }
+  }
+  
+  grid.innerHTML = rows.map((r,i) => {
+    const p = r.parsed_data || {};
+    const drug = p.drug || r.ocr_raw_text?.split('\n')[0] || 'Pending AI extraction';
+    const name = p.patient_name || `Patient #${r.user_id || 1000+i}`;
+    const time = r.uploaded_at ? new Date(r.uploaded_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : 'Just now';
+    const id   = r.prescription_id || i+1000;
+    const imgHtml = r.image_url 
+      ? `<img src="${r.image_url}" alt="Prescription" style="width:100%;height:100%;object-fit:cover;cursor:pointer" onclick="window.open('${r.image_url}','_blank')">`
+      : `<i class="fa-solid fa-file-lines"></i>`;
+    return `<div class="qcard" id="qc-${id}">
+      <div class="qcard-img">${imgHtml}<div class="qcard-badge"><span class="badge b-amber">Pending</span></div></div>
+      <div class="qcard-body">
+        <div class="qcard-meta">${name} · ${time}</div>
+        <div class="qcard-name">${p.patient_name || 'Patient #'+(r.user_id||1000+i)}</div>
+        <div class="qcard-drug"><i class="fa-solid fa-robot"></i> AI: ${drug}</div>
+        <div class="qcard-actions">
+          <button class="btn btn-green btn-sm" onclick="approveRx(${id},this)"><i class="fa-solid fa-check"></i> Approve</button>
+          <button class="btn btn-red btn-sm"   onclick="rejectRx(${id},this)"><i class="fa-solid fa-xmark"></i> Reject</button>
+          <button class="btn btn-ghost btn-sm btn-xs" onclick="openAlt(${id})"><i class="fa-solid fa-rotate-left"></i> Alt</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function demoQueue() {
+  const t = new Date();
+  return [
+    {prescription_id:1001,user_id:1042,uploaded_at:new Date(t-5*60000).toISOString(),parsed_data:{drug:'Desloratadine 5mg',patient_name:'Sara Al-Khalidi'}},
+    {prescription_id:1002,user_id:1039,uploaded_at:new Date(t-12*60000).toISOString(),parsed_data:{drug:'Amoxicillin 500mg',patient_name:'Mohamed Farouq'}},
+    {prescription_id:1003,user_id:1035,uploaded_at:new Date(t-25*60000).toISOString(),parsed_data:{drug:'Panadol 500mg',patient_name:'Nour Abdel-Rahim'}},
+    {prescription_id:1004,user_id:1031,uploaded_at:new Date(t-38*60000).toISOString(),parsed_data:{drug:'Ibuprofen 400mg',patient_name:'Layla Mansour'}},
+    {prescription_id:1005,user_id:1028,uploaded_at:new Date(t-55*60000).toISOString(),parsed_data:{drug:'Urea 10% Cream',patient_name:'Karim Tawfik'}},
+  ];
+}
+
+async function approveRx(id, btn) {
+  if (usesLiveBackend()) {
+    try {
+      await apiJson('PATCH', `/api/prescriptions/${id}/review`, { validation_status: 'approved', rejection_reason: null });
+    } catch (e) {
+      toast('error', 'Approve failed', String(e.message || e).slice(0, 160));
+      return;
+    }
+  }
+  await logAction('APPROVED', { prescription_id: id });
+  const card = btn.closest('.qcard');
+  card.style.opacity='.4'; card.style.pointerEvents='none';
+  card.querySelector('.qcard-badge .badge').className='badge b-green';
+  card.querySelector('.qcard-badge .badge').textContent='Approved';
+  toast('success','Prescription Approved','#'+id+' — notified patient');
+  loadDashboard();
+}
+
+async function rejectRx(id, btn) {
+  if (usesLiveBackend()) {
+    try {
+      await apiJson('PATCH', `/api/prescriptions/${id}/review`, { validation_status: 'rejected', rejection_reason: 'Rejected by pharmacist' });
+    } catch (e) {
+      toast('error', 'Reject failed', String(e.message || e).slice(0, 160));
+      return;
+    }
+  }
+  await logAction('REJECTED', { prescription_id: id });
+  const card = btn.closest('.qcard');
+  card.style.opacity='.4'; card.style.pointerEvents='none';
+  card.querySelector('.qcard-badge .badge').className='badge b-red';
+  card.querySelector('.qcard-badge .badge').textContent='Rejected';
+  toast('info','Prescription Rejected','#'+id);
+  loadDashboard();
+}
+
+async function loadDoctorPrescriptions() {
+  if (isDemoMode) {
+    document.getElementById('dprx-tb').innerHTML = '<tr><td colspan="7" class="empty">Doctor dashboard uses live database only.</td></tr>';
+    return;
+  }
+  try {
+    doctorPrescriptionsCache = await apiGet('/api/doctor/prescriptions?limit=200') || [];
+    
+    // Fetch image URLs for prescriptions with images
+    for (const r of doctorPrescriptionsCache) {
+      if (r.image_storage_path && !isDemoMode) {
+        try {
+          const imgData = await apiGet(`/api/prescriptions/${r.prescription_id}/image-url`);
+          r.image_url = imgData.url;
+        } catch (e) {
+          r.image_url = null;
+        }
+      }
+    }
+    
+    const tb = document.getElementById('dprx-tb');
+    if (!tb) return;
+    tb.innerHTML = doctorPrescriptionsCache.length ? doctorPrescriptionsCache.map((r) => {
+      const p = r.parsed_data || {};
+      const img = r.image_url ? `<a href="${r.image_url}" target="_blank" rel="noopener">View Image</a>` : (r.image_storage_path ? '<span style="color:var(--text3)">Stored</span>' : '—');
+      const parsed = p.drug || JSON.stringify(p).slice(0, 60);
+      const badge = r.validation_status === 'approved' ? '<span class="badge b-green">Approved</span>' : r.validation_status === 'rejected' ? '<span class="badge b-red">Rejected</span>' : '<span class="badge b-amber">Pending</span>';
+      return `<tr>
+        <td class="mono">#${r.prescription_id}</td>
+        <td>${r.patient_name || 'Unknown'}</td>
+        <td>${img}</td>
+        <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${parsed || '—'}</td>
+        <td>${badge}</td>
+        <td class="mono">${r.uploaded_at ? new Date(r.uploaded_at).toLocaleString() : '—'}</td>
+        <td>
+          <button class="btn btn-ghost btn-xs" onclick="openDoctorPrescription(${r.prescription_id})">View</button>
+        </td>
+      </tr>`;
+    }).join('') : '<tr><td colspan="7" class="empty">No prescriptions found.</td></tr>';
+  } catch (e) {
+    const tb = document.getElementById('dprx-tb');
+    if (tb) tb.innerHTML = '<tr><td colspan="7" class="empty">Failed to load prescriptions.</td></tr>';
+    toast('error', 'Doctor prescriptions', String(e.message || e).slice(0, 140));
+  }
+}
+
+function openDoctorPrescription(id) {
+  const r = doctorPrescriptionsCache.find((x) => x.prescription_id === id);
+  if (!r) return;
+  const p = r.parsed_data || {};
+  const photo = r.image_url
+    ? `<a class="btn btn-ghost btn-xs" href="${r.image_url}" target="_blank" rel="noopener"><i class="fa-solid fa-image"></i> Open Photo</a><div style="margin-top:8px"><img src="${r.image_url}" alt="Prescription" style="max-width:100%;max-height:260px;border:1px solid var(--border);border-radius:10px"></div>`
+    : '<div style="color:var(--text3);font-size:12px">Photo unavailable (missing bucket, private object, or no image uploaded).</div>';
+  openModal(`Prescription #${id}`, `
+    <div class="f-group"><label class="f-label">Patient</label><div>${r.patient_name || 'Unknown'}</div></div>
+    <div class="f-group"><label class="f-label">Uploaded</label><div>${r.uploaded_at ? new Date(r.uploaded_at).toLocaleString() : '—'}</div></div>
+    <div class="f-group"><label class="f-label">Prescription Photo</label><div>${photo}</div></div>
+    <div class="f-group"><label class="f-label">OCR Raw Text</label><div style="font-size:12px;color:var(--text2);white-space:pre-wrap">${(r.ocr_raw_text || '—')}</div></div>
+    <div class="f-group"><label class="f-label">Parsed Data</label><pre style="margin:0;background:var(--gray-50);border:1px solid var(--border);padding:10px;border-radius:8px;max-height:200px;overflow:auto">${JSON.stringify(p, null, 2)}</pre></div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn btn-green" onclick="doctorReviewPrescription(${id}, 'approved')"><i class="fa-solid fa-check"></i> Approve</button>
+      <button class="btn btn-red" onclick="doctorReviewPrescription(${id}, 'rejected')"><i class="fa-solid fa-xmark"></i> Reject</button>
+    </div>
+  `);
+}
+
+async function doctorReviewPrescription(id, status) {
+  const reason = status === 'rejected' ? (prompt('Reason for rejection:') || '').trim() : null;
+  if (status === 'rejected' && !reason) { toast('warning', 'Reason required', 'Please enter rejection reason.'); return; }
+  try {
+    await apiJson('PATCH', `/api/doctor/prescriptions/${id}/review`, {
+      validation_status: status,
+      rejection_reason: reason,
+      alternative_drug_id: null,
+    });
+    closeModal();
+    toast('success', 'Updated', `Prescription #${id} marked ${status}.`);
+    loadDoctorPrescriptions();
+    loadQueue();
+    loadDashboard();
+  } catch (e) {
+    toast('error', 'Review failed', String(e.message || e).slice(0, 140));
+  }
+}
+
+function openAlt(id) {
+  const opts = getForecastRows().map(f=>`<option value="${f.drug_id}">${f.drug_name} — ${f.trade_name}</option>`).join('');
+  openModal('Recommend Alternative Drug', `
+    <div class="f-group"><label class="f-label">Alternative Drug</label>
+      <select class="f-input" id="alt-drug">${opts}</select>
+    </div>
+    <div class="f-group"><label class="f-label">Reason</label><textarea class="f-input" id="alt-reason" rows="2" placeholder="e.g. Original out of stock..."></textarea></div>
+    <button class="btn btn-blue btn-full" onclick="sendAltSuggestion(${id})">Send Alternative</button>
+  `);
+}
+
+async function sendAltSuggestion(prescriptionId) {
+  const altId = parseInt(document.getElementById('alt-drug').value, 10);
+  const reason = document.getElementById('alt-reason').value.trim();
+  if (usesLiveBackend()) {
+    try {
+      await apiJson('PATCH', `/api/prescriptions/${prescriptionId}/review`, {
+        validation_status: 'approved',
+        rejection_reason: null,
+        alternative_drug_id: Number.isFinite(altId) ? altId : null,
+        pharmacist_notes: reason || null,
+      });
+    } catch (e) {
+      toast('error', 'Alternative', String(e.message || e).slice(0, 160));
+      return;
+    }
+  }
+  closeModal();
+  toast('success','Alternative recorded', (reason ? reason + ' — ' : '') + 'Approved with substituted drug');
+  await loadQueue();
+  await loadDashboard();
+}
+
+async function loadDrugs() {
+  document.getElementById('disease-tb').innerHTML = DISEASES.map(([d,drug,score]) =>
+    `<tr><td>${d}</td><td>${drug}</td><td>${scoreBadge(score)}</td></tr>`
+  ).join('');
+
+  const sel = document.getElementById('drug-sel');
+  sel.innerHTML = '<option value="">— Select a drug —</option>';
+
+  const tb = document.getElementById('drugs-tb');
+  if (isDemoMode) {
+    FC.forEach((f) => { sel.innerHTML += `<option value="${f.drug_id}">${f.drug_name}</option>`; });
+    tb.innerHTML = FC.slice(0,10).map((f,i) => `
+      <tr><td class="mono">${i+1}</td>
+          <td><b>${f.drug_name}</b><br><span style="font-size:11px;color:var(--text2)">${f.trade_name}</span></td>
+          <td><span class="badge b-gray">${f.category}</span></td>
+          <td>${f.category}</td><td class="mono">—</td><td class="mono">2026-01-15</td>
+          <td><button class="btn btn-ghost btn-xs">Edit</button></td></tr>`).join('');
+    return;
+  }
+  try {
+    const drugs = await apiGet('/api/drugs/?limit=500') || [];
+    cachedDrugRows = drugs;
+    drugs.forEach((d) => {
+      sel.innerHTML += `<option value="${d.drug_id}">${(d.brand_names || 'Drug #' + d.drug_id).split(',')[0].trim()}</option>`;
+    });
+    tb.innerHTML = drugs.length ? drugs.map((d) =>
+      `<tr><td class="mono">${d.drug_id}</td>
+           <td><b>${d.brand_names||'—'}</b></td>
+           <td><span class="badge b-gray">${d.classification||'—'}</span></td>
+           <td>${d.dosage_form||'—'}</td><td>${d.strengths||'—'}</td>
+           <td class="mono">${d.last_validated_date||'—'}</td>
+           <td><button class="btn btn-ghost btn-xs" onclick="editDrug(${d.drug_id})">Edit</button></td></tr>`
+    ).join('') : '<tr><td colspan="7" class="empty">No drugs in database yet</td></tr>';
+  } catch (e) {
+    tb.innerHTML = '<tr><td colspan="7" class="empty">Could not load drugs</td></tr>';
+    toast('error', 'Drug list', String(e.message || e).slice(0, 120));
+  }
+}
+
+function lookupDrug() {
+  const drugIdStr = document.getElementById('drug-sel').value;
+  const box = document.getElementById('drug-detail-box');
+  if (!drugIdStr) { box.innerHTML=''; return; }
+  const drugId = parseInt(drugIdStr, 10);
+  const d = getForecastRows().find((f) => f.drug_id === drugId);
+  if (!d) {
+    const dr = (cachedDrugRows || []).find((x) => x.drug_id === drugId);
+    if (!dr) { box.innerHTML = '<div class="drug-detail" style="color:var(--text2);font-size:13px;">No forecast row for this drug yet. Run prediction sync after inventory/predictions are populated.</div>'; return; }
+    box.innerHTML = `<div class="drug-detail">
+      <div class="drug-name-lg">${dr.brand_names || 'Drug #' + drugId}</div>
+      <div class="drug-tags"><span class="badge b-gray">${dr.classification || 'Catalog'}</span></div>
+      <div class="drug-row"><div class="drug-rl">Dosage / strength</div><div class="drug-rv">${dr.dosage_form || '—'} · ${dr.strengths || '—'}</div></div>
+    </div>`;
+    return;
+  }
+  const ac = d.alert_level==='CRITICAL'?'b-red':d.alert_level==='WARNING'?'b-amber':'b-green';
+  const dc = d.days_remaining<5?'var(--red)':d.days_remaining<10?'var(--amber)':'var(--emerald)';
+  box.innerHTML = `<div class="drug-detail">
+    <div class="drug-name-lg">${d.drug_name}</div>
+    <div class="drug-tags"><span class="badge b-blue">${d.category}</span><span class="badge ${ac}">${d.alert_level}</span><span class="badge b-gray">${d.current_stock} units</span></div>
+    <div class="drug-row"><div class="drug-rl">Trade Name</div><div class="drug-rv">${d.trade_name}</div></div>
+    <div class="drug-row"><div class="drug-rl">Predicted Daily Usage</div><div class="drug-rv mono">${d.predicted_daily_usage} units/day</div></div>
+    <div class="drug-row"><div class="drug-rl">Days Remaining</div><div class="drug-rv" style="color:${dc};font-weight:800">${d.days_remaining} days — Stockout: ${d.stock_out_date}</div></div>
+    <div class="drug-row"><div class="drug-rl">Model Accuracy (MAE)</div><div class="drug-rv mono">±${d.model_mae} units · R² ${d.model_r2}</div></div>
+    <button class="btn btn-blue btn-full btn-sm" style="margin-top:8px" onclick="toast('success','Assigned','Drug assigned to patient')">Assign to Patient</button>
+  </div>`;
+}
+
+async function loadInventory() {
+  let rows = [];
+  if (isDemoMode) {
+    rows = FC.map((f,i) => ({
+      inventory_id:i+1, drug_id:f.drug_id, drug_name:f.drug_name, category:f.category,
+      quantity_in_stock:f.current_stock,
+      reorder_threshold:Math.round(f.predicted_daily_usage*7),
+      expiry_date:`202${6+Math.floor(i/5)}-${String(1+(i*2)%12+1).padStart(2,'0')}-15`,
+      last_updated:new Date().toISOString()
+    }));
+  } else {
+    try {
+      const data = await apiGet('/api/inventory/') || [];
+      rows = data.map(r => ({
+        ...r,
+        drug_name: r.drugs?.brand_names?.split(',')[0]?.trim() || r.drugs?.brand_names || `Drug #${r.drug_id}`,
+        category:  r.drugs?.classification || '—'
+      }));
+    } catch (e) {
+      rows = [];
+      toast('error', 'Inventory', String(e.message || e).slice(0, 120));
+    }
+  }
+
+  const crit = rows.filter(r=>r.quantity_in_stock<=r.reorder_threshold).length;
+  const exp  = rows.filter(r=>r.expiry_date && new Date(r.expiry_date)<new Date(Date.now()+90*86400000)).length;
+  const tot  = rows.reduce((s,r)=>s+(r.quantity_in_stock||0),0);
+  document.getElementById('iv-crit').textContent  = crit;
+  document.getElementById('iv-exp').textContent   = exp;
+  document.getElementById('iv-total').textContent = tot.toLocaleString();
+  document.getElementById('iv-lines').textContent = rows.length;
+
+  document.getElementById('iv-tb').innerHTML = rows.map(r => {
+    const pct = Math.min(100, Math.round((r.quantity_in_stock/Math.max(r.reorder_threshold*3,1))*100));
+    const bc  = r.quantity_in_stock<=r.reorder_threshold?'var(--red)':pct<55?'var(--amber)':'var(--emerald)';
+    const sb2 = r.quantity_in_stock<=r.reorder_threshold?'<span class="badge b-red">Critical</span>':pct<55?'<span class="badge b-amber">Low</span>':'<span class="badge b-green">OK</span>';
+    const es  = r.expiry_date && new Date(r.expiry_date)<new Date(Date.now()+90*86400000) ? `style="color:var(--amber);font-weight:700"` : '';
+    return `<tr>
+      <td><b>${r.drug_name}</b><br><span style="font-size:11px;color:var(--text2)">${r.category}</span></td>
+      <td><input class="edit-inp" value="${r.quantity_in_stock}" onblur="updateStock(${r.inventory_id},this.value)"> <span style="font-size:11px;color:var(--text3)">units</span></td>
+      <td style="min-width:130px"><div class="sbar-row"><div class="sbar-bg"><div class="sbar-fill" style="width:${pct}%;background:${bc}"></div></div><div class="sbar-lbl" style="color:${bc}">${pct}%</div></div></td>
+      <td><input class="edit-inp" value="${r.reorder_threshold}" onblur="updateReorder(${r.inventory_id},this.value)"></td>
+      <td class="mono" ${es}>${r.expiry_date||'—'}</td>
+      <td class="mono" style="font-size:11px;color:var(--text3)">${r.last_updated?new Date(r.last_updated).toLocaleString():'—'}</td>
+      <td>${sb2}</td>
+      <td><button class="btn btn-ghost btn-xs" onclick="openAddStock(${r.drug_id})">+ Stock</button></td>
+    </tr>`;
+  }).join('');
+}
+
+async function updateStock(id, qty) {
+  const n = parseInt(qty, 10);
+  if (usesLiveBackend()) {
+    try {
+      await apiJson('PATCH', `/api/inventory/${id}`, { quantity_in_stock: n });
+    } catch (e) {
+      toast('error', 'Stock update', String(e.message || e).slice(0, 120));
+      return;
+    }
+  }
+  await logAction('STOCK_UPDATE',{inventory_id:id,qty:n});
+  toast('success','Stock Updated',`Inventory #${id} set to ${n} units`);
+}
+async function updateReorder(id, val) {
+  const n = parseInt(val, 10);
+  if (usesLiveBackend()) {
+    try {
+      await apiJson('PATCH', `/api/inventory/${id}`, { reorder_threshold: n });
+    } catch (e) {
+      toast('error', 'Reorder level', String(e.message || e).slice(0, 120));
+    }
+  }
+}
+
+function openAddStock(drugId) {
+  let optSrc = getForecastRows();
+  if ((!optSrc || !optSrc.length) && cachedDrugRows.length) {
+    optSrc = cachedDrugRows.map((d) => ({
+      drug_id: d.drug_id,
+      drug_name: (d.brand_names || '').split(',')[0]?.trim() || `Drug #${d.drug_id}`,
+    }));
+  }
+  const drugOpts = optSrc.map(f=>`<option value="${f.drug_id}" ${f.drug_id===drugId?'selected':''}>${f.drug_name}</option>`).join('');
+  openModal('Add Stock', `
+    <div class="f-group"><label class="f-label">Drug</label>
+      <select class="f-input" id="as-drug">${drugOpts}</select>
+    </div>
+    <div class="form-row">
+      <div class="f-group"><label class="f-label">Quantity to Add</label><input class="f-input" type="number" id="as-qty" placeholder="100"></div>
+      <div class="f-group"><label class="f-label">Expiry Date</label><input class="f-input" type="date" id="as-exp"></div>
+    </div>
+    <div class="f-group"><label class="f-label">Batch Number</label><input class="f-input" id="as-batch" placeholder="BT-2026-001"></div>
+    <button class="btn btn-blue btn-full" onclick="confirmAddStock()">Add to Inventory</button>
+  `);
+}
+
+async function confirmAddStock() {
+  const drugId = parseInt(document.getElementById('as-drug').value, 10);
+  const qty    = parseInt(document.getElementById('as-qty').value||0, 10);
+  const expRaw = document.getElementById('as-exp').value;
+  const batch  = document.getElementById('as-batch').value.trim() || null;
+  if (!qty) { toast('error','Error','Enter a quantity.'); return; }
+  if (usesLiveBackend()) {
+    try {
+      await apiJson('POST', '/api/inventory/add-stock', {
+        drug_id: drugId,
+        quantity_to_add: qty,
+        expiry_date: expRaw || null,
+        batch_number: batch,
+      });
+    } catch (e) {
+      toast('error', 'Add stock', String(e.message || e).slice(0, 160));
+      return;
+    }
+  }
+  await logAction('STOCK_UPDATE',{ drug_id: drugId, qty_added: qty });
+  toast('success','Stock Added',`${qty} units added`);
+  closeModal(); loadInventory(); refreshLiveForecastData();
+}
+
+function openAddDrug() {
+  openModal('Add New Drug to Database', `
+    <div class="f-group"><label class="f-label">Brand Names</label><input class="f-input" id="nd-brand" placeholder="Panadol Extra, Paracetamol 500mg..."></div>
+    <div class="form-row">
+      <div class="f-group"><label class="f-label">Classification</label><input class="f-input" id="nd-class" placeholder="Analgesic"></div>
+      <div class="f-group"><label class="f-label">Dosage Form</label><input class="f-input" id="nd-form" placeholder="Tablet (Oral)"></div>
+    </div>
+    <div class="f-group"><label class="f-label">Strengths</label><input class="f-input" id="nd-str" placeholder="500mg"></div>
+    <div class="f-group"><label class="f-label">Contraindications</label><textarea class="f-input" id="nd-contra" rows="2" placeholder="Hepatic impairment..."></textarea></div>
+    <div class="f-group"><label class="f-label">Side Effects</label><textarea class="f-input" id="nd-side" rows="2" placeholder="Nausea, headache..."></textarea></div>
+    <button class="btn btn-blue btn-full" onclick="confirmAddDrug()">Save to Database</button>
+  `);
+}
+
+async function confirmAddDrug() {
+  const brand = document.getElementById('nd-brand').value.trim();
+  if (!brand) { toast('error','Required','Brand name is required.'); return; }
+  if (usesLiveBackend()) {
+    try {
+      await apiJson('POST', '/api/drugs/', {
+        brand_names: brand,
+        classification: document.getElementById('nd-class').value || null,
+        dosage_form: document.getElementById('nd-form').value || null,
+        strengths: document.getElementById('nd-str').value || null,
+        contraindications: document.getElementById('nd-contra').value || null,
+        side_effects: document.getElementById('nd-side').value || null,
+        last_validated_date: new Date().toISOString().split('T')[0],
+      });
+    } catch (e) {
+      toast('error', 'Drug save', String(e.message || e).slice(0, 160));
+      return;
+    }
+  }
+  cachedDrugRows = [];
+  toast('success','Drug Added',brand+' saved to database');
+  closeModal(); await loadDrugs();
+}
+
+async function editDrug(drugId) {
+  if (!usesLiveBackend()) {
+    toast('info', 'Drug record', `Editing drug #${drugId}: use Add Drug for new rows. Full editor can be wired to your backend API.`);
+    return;
+  }
+  try {
+    const drug = await apiGet(`/api/drugs/?limit=500`);
+    const drugData = drug.find(d => d.drug_id === drugId);
+    if (!drugData) {
+      toast('error', 'Drug record', 'Drug not found');
+      return;
+    }
+    openModal('Edit Drug', `
+      <div class="f-group"><label class="f-label">Brand Names</label><input class="f-input" id="ed-brand" value="${drugData.brand_names || ''}"></div>
+      <div class="form-row">
+        <div class="f-group"><label class="f-label">Classification</label><input class="f-input" id="ed-class" value="${drugData.classification || ''}"></div>
+        <div class="f-group"><label class="f-label">Dosage Form</label><input class="f-input" id="ed-form" value="${drugData.dosage_form || ''}"></div>
+      </div>
+      <div class="f-group"><label class="f-label">Strengths</label><input class="f-input" id="ed-str" value="${drugData.strengths || ''}"></div>
+      <div class="f-group"><label class="f-label">Contraindications</label><textarea class="f-input" id="ed-contra" rows="2">${drugData.contraindications || ''}</textarea></div>
+      <div class="f-group"><label class="f-label">Side Effects</label><textarea class="f-input" id="ed-side" rows="2">${drugData.side_effects || ''}</textarea></div>
+      <button class="btn btn-blue btn-full" onclick="confirmEditDrug(${drugId})">Save Changes</button>
+    `);
+  } catch (e) {
+    toast('error', 'Drug record', String(e.message || e).slice(0, 120));
+  }
+}
+
+async function confirmEditDrug(drugId) {
+  const brand = document.getElementById('ed-brand').value.trim();
+  if (!brand) { toast('error','Required','Brand name is required.'); return; }
+  try {
+    await apiJson('PUT', `/api/drugs/${drugId}`, {
+      brand_names: brand,
+      classification: document.getElementById('ed-class').value || null,
+      dosage_form: document.getElementById('ed-form').value || null,
+      strengths: document.getElementById('ed-str').value || null,
+      contraindications: document.getElementById('ed-contra').value || null,
+      side_effects: document.getElementById('ed-side').value || null,
+    });
+    cachedDrugRows = [];
+    toast('success','Drug Updated',brand+' updated successfully');
+    closeModal(); await loadDrugs();
+  } catch (e) {
+    toast('error', 'Drug update', String(e.message || e).slice(0, 160));
+  }
+}
+
+/* ANALYTICS */
+function populateFcSel() {
+  const sel = document.getElementById('fc-sel');
+  if (!sel) return;
+  const rows = getForecastRows();
+  sel.innerHTML = '';
+  if (!rows.length) {
+    sel.innerHTML = '<option value="0">No forecast rows</option>';
+    return;
+  }
+  rows.forEach((f, i) => { sel.innerHTML += `<option value="${i}">${f.drug_name}</option>`; });
+}
+
+function renderFcTable() {
+  const rows = getForecastRows();
+  document.getElementById('fc-tb').innerHTML = rows.map((d,i) => {
+    const cls = d.alert_level==='CRITICAL'?'fc-critical':d.alert_level==='WARNING'?'fc-warning':'';
+    const ab  = d.alert_level==='CRITICAL'?'<span class="badge b-red">CRITICAL</span>':d.alert_level==='WARNING'?'<span class="badge b-amber">WARNING</span>':'<span class="badge b-green">OK</span>';
+    const dc  = d.days_remaining<5?'style="color:var(--red);font-weight:800"':d.days_remaining<10?'style="color:var(--amber);font-weight:700"':'style="color:var(--emerald);font-weight:700"';
+    return `<tr class="${cls}">
+      <td class="mono">${i+1}</td>
+      <td><b>${d.drug_name}</b><br><span style="font-size:11px;color:var(--text2)">${d.trade_name}</span></td>
+      <td><span class="badge b-gray">${d.category}</span></td>
+      <td class="mono">${d.current_stock}</td>
+      <td class="mono">${d.predicted_daily_usage}</td>
+      <td class="mono" ${dc}>${d.days_remaining}d</td>
+      <td class="mono">${d.stock_out_date}</td>
+      <td class="mono">${d.model_mae}</td>
+      <td class="mono">${d.model_r2}</td>
+      <td>${ab}</td>
+      <td>${d.alert_level==='CRITICAL'?`<button class="btn btn-red btn-xs" onclick="orderNow(${d.drug_id})">Order Now</button>`:`<button class="btn btn-ghost btn-xs" onclick="scheduleOrder(${d.drug_id})">Schedule</button>`}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function syncPredictions() {
+  if (isDemoMode) { toast('info','Demo Mode','Prediction sync runs against the backend in live mode'); return; }
+  try {
+    const res = await apiJson('POST', '/api/predictions/run', {});
+    await refreshLiveForecastData();
+    renderFcTable(); renderFcChart();
+    toast('success','Synced', `${res.drugs_processed != null ? res.drugs_processed + ' drugs' : 'Model run'} processed`);
+  } catch (e) {
+    toast('error','Sync Failed', String(e.message || e));
+  }
+}
+
+function orderNow(id) {
+  const d = getForecastRows().find(f=>f.drug_id===id);
+  if (!d) { toast('warning','Drug', 'Forecast row missing for this ID'); return; }
+  toast('warning','Order Placed',`${d.drug_name} — ~${Math.round(d.predicted_daily_usage*30)} units`);
+  logAction('ORDER_PLACED',{drug_id:id,drug_name:d.drug_name});
+}
+function scheduleOrder(id) {
+  const d = getForecastRows().find(f=>f.drug_id===id);
+  if (!d) { toast('warning','Drug', 'Forecast row missing for this ID'); return; }
+  toast('info','Scheduled',`${d.drug_name} order scheduled`);
+}
+
+/* REVENUE */
+async function loadRevenue() {
+  if (isDemoMode) { demoRevenue(); return; }
+  try {
+    const rev = await apiGet('/api/analytics/revenue');
+    document.getElementById('rv-today').textContent = 'SAR ' + Number(rev.today_revenue ?? 0).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    document.getElementById('rv-today-sub').textContent = (rev.today_orders ?? 0) + ' transactions today';
+    document.getElementById('rv-month').textContent = 'SAR ' + Number(rev.month_revenue ?? 0).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    document.getElementById('rv-month-sub').textContent = 'Month to date';
+    document.getElementById('rv-orders').textContent = String(rev.total_orders ?? 0);
+
+    const allRes = await apiGet('/api/analytics/transactions?limit=50') || [];
+    document.getElementById('tx-tb').innerHTML = allRes.length ? allRes.map(r => {
+      const nm = r.drugs?.brand_names ? r.drugs.brand_names.split(',')[0].trim() : null;
+      return `<tr><td class="mono">#${r.transaction_id}</td>
+           <td class="mono" style="font-size:11px">${r.transaction_time?new Date(r.transaction_time).toLocaleString():'—'}</td>
+           <td>${nm || ('Drug #' + (r.drug_id||'—'))}</td>
+           <td class="mono">${r.quantity_dispensed||'—'}</td>
+           <td><span class="badge b-blue">${r.transaction_type||'—'}</span></td>
+           <td class="mono">SAR ${(r.total_price||0).toFixed(2)}</td>
+           <td>User #${r.user_id||'—'}</td></tr>`;
+    }).join('') : '<tr><td colspan="7" class="empty">No transactions recorded</td></tr>';
+  } catch (e) {
+    toast('error', 'Revenue', String(e.message || e).slice(0, 120));
+    document.getElementById('rv-today').textContent = 'SAR 0';
+    document.getElementById('rv-today-sub').textContent = '—';
+    document.getElementById('rv-month').textContent = 'SAR 0';
+    document.getElementById('rv-month-sub').textContent = '—';
+    document.getElementById('rv-orders').textContent = '0';
+    document.getElementById('tx-tb').innerHTML = '<tr><td colspan="7" class="empty">Could not load transactions</td></tr>';
+  }
+}
+
+function demoRevenue() {
+  document.getElementById('rv-today').textContent     = 'SAR 4,820';
+  document.getElementById('rv-today-sub').textContent = '8.3% higher than yesterday';
+  document.getElementById('rv-month').textContent     = 'SAR 128,450';
+  document.getElementById('rv-month-sub').textContent = '14.2% higher than last month';
+  document.getElementById('rv-orders').textContent    = '2,341';
+  document.getElementById('tx-tb').innerHTML = demoTxRows();
+}
+function demoTxRows() {
+  const now = new Date();
+  return [
+    ['#4821',now,'Panadol 500mg',2,'dispense','24.50','#1042'],
+    ['#4820',new Date(now-600000),'Amoxicillin 500mg',1,'dispense','38.00','#1039'],
+    ['#4819',new Date(now-1200000),'Ibuprofen 400mg',3,'dispense','19.75','#1035'],
+  ].map(([id,t,drug,qty,type,price,pat])=>
+    `<tr><td class="mono">${id}</td><td class="mono" style="font-size:11px">${t.toLocaleString()}</td><td>${drug}</td><td class="mono">${qty}</td><td><span class="badge b-blue">${type}</span></td><td class="mono">SAR ${price}</td><td>${pat}</td></tr>`
+  ).join('');
+}
+
+async function loadAudit() {
+  if (isDemoMode) { demoAudit(); return; }
+  try {
+    const filter = document.getElementById('audit-filter')?.value;
+    let url = '/api/analytics/audit?limit=50';
+    if (filter) url += '&action_type=' + encodeURIComponent(filter);
+    const data = await apiGet(url) || [];
+    if (!data.length) {
+      document.getElementById('audit-tb').innerHTML = '<tr><td colspan="5" class="empty">No audit entries yet</td></tr>';
+      return;
+    }
+    document.getElementById('audit-tb').innerHTML = data.map(r => {
+      const ac = r.action_type?.includes('APPROVED')?'style="color:var(--emerald);font-weight:700"':r.action_type?.includes('REJECTED')?'style="color:var(--red);font-weight:700"':'style="color:var(--blue-600);font-weight:700"';
+      const db = r.action_type?.includes('APPROVED')?'<span class="badge b-green">Approved</span>':r.action_type?.includes('REJECTED')?'<span class="badge b-red">Rejected</span>':'<span class="badge b-gray">Info</span>';
+      return `<tr><td class="mono" style="font-size:11px">${r.timestamp?new Date(r.timestamp).toLocaleString():'—'}</td>
+                  <td>${r.users?.username||'System'}</td>
+                  <td ${ac}>${r.action_type||'—'}</td>
+                  <td style="font-size:12px;color:var(--text2);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.details?JSON.stringify(r.details).slice(0,80):'—'}</td>
+                  <td>${db}</td></tr>`;
+    }).join('');
+  } catch (e) {
+    document.getElementById('audit-tb').innerHTML = '<tr><td colspan="5" class="empty">Could not load audit log</td></tr>';
+    toast('error', 'Audit', String(e.message || e).slice(0, 120));
+  }
+}
+
+function demoAudit() {
+  const rows = [
+    [new Date(),'Dr. Ahmed Hassan','APPROVED','Prescription #1041 — Ibuprofen 400mg','<span class="badge b-green">Approved</span>'],
+    [new Date(Date.now()-600000),'Dr. Sara Nabil','REJECTED','Prescription #1040 — Missing date','<span class="badge b-red">Rejected</span>'],
+    [new Date(Date.now()-1200000),'Dr. Ahmed Hassan','STOCK_UPDATE','Panadol 500mg stock increased by 200 units','<span class="badge b-gray">Info</span>'],
+    [new Date(Date.now()-3600000),'System','STOCK_ALERT','Amoxicillin 500mg — CRITICAL','<span class="badge b-red">Critical</span>'],
+    [new Date(Date.now()-7200000),'Dr. Omar Saleh','LOGIN','Shift started','<span class="badge b-gray">Info</span>'],
+  ];
+  const ac = {APPROVED:'color:var(--emerald)',REJECTED:'color:var(--red)',STOCK_UPDATE:'color:var(--blue-600)',STOCK_ALERT:'color:var(--red)',LOGIN:'color:var(--blue-600)'};
+  document.getElementById('audit-tb').innerHTML = rows.map(([t,u,a,d,b])=>
+    `<tr><td class="mono" style="font-size:11px">${t.toLocaleString()}</td><td>${u}</td>
+         <td style="font-weight:700;${ac[a]||''}">${a}</td>
+         <td style="font-size:12px;color:var(--text2)">${d}</td><td>${b}</td></tr>`
+  ).join('');
+}
+
+function exportAudit() {
+  toast('info','Exported','Audit log export started (demo)');
+}
+
+async function logAction(action, details) {
+  if (isDemoMode || !sb) return;
+  try {
+    await sb.from('auditlogs').insert({ action_type: action, details, timestamp: new Date().toISOString() });
+  } catch (_) { /* Most actions are logged server-side; anon RLS may block client inserts */ }
+}
+
+/* PATIENT */
+async function loadPatientHome() {
+  document.getElementById('p-hero-name').textContent = currentUser?.name || 'Patient';
+  await loadOrdersData();
+  updatePatientOrderHint();
+  if (isDemoMode) { demoPatient(); return; }
+  const rows = patientOrdersCache || [];
+  
+  // Fetch drug info for alternative drugs
+  const drugIds = new Set();
+  rows.forEach(r => { if (r.alternative_drug_id) drugIds.add(r.alternative_drug_id); });
+  const drugsMap = {};
+  if (drugIds.size > 0 && !isDemoMode) {
+    try {
+      const drugs = await apiGet('/api/drugs/') || [];
+      drugs.forEach(d => { drugsMap[d.drug_id] = d; });
+    } catch (e) {
+      console.error('Failed to load drugs for alternatives:', e);
+    }
+  }
+  
+  document.getElementById('p-rx-tb').innerHTML = rows.length ? rows.map(r => {
+    const sb2 = r.validation_status==='approved'?'<span class="badge b-green">Approved</span>':r.validation_status==='rejected'?'<span class="badge b-red">Rejected</span>':'<span class="badge b-amber">Under Review</span>';
+    const p = r.parsed_data||{};
+    let drugInfo = p.drug || 'Processing...';
+    let notes = r.rejection_reason || '—';
+    
+    // Show alternative drug if approved with alternative
+    if (r.validation_status === 'approved' && r.alternative_drug_id) {
+      const altDrug = drugsMap[r.alternative_drug_id];
+      if (altDrug) {
+        drugInfo = `${p.drug || 'Original'} → <span style="color:var(--emerald);font-weight:700">${altDrug.brand_names}</span>`;
+      }
+    }
+    
+    // Show pharmacist notes if available
+    if (r.pharmacist_notes) {
+      notes = r.pharmacist_notes;
+    }
+    
+    return `<tr style="cursor:pointer" onclick="viewPrescriptionDetail(${r.prescription_id})"><td class="mono">#${r.prescription_id}</td><td class="mono">${new Date(r.uploaded_at).toLocaleDateString()}</td><td>${sb2}</td><td>${drugInfo}</td><td>${notes}</td></tr>`;
+  }).join('') : '<tr><td colspan="5" class="empty">No prescriptions uploaded yet</td></tr>';
+  buildNotifications();
+}
+
+function demoPatient() {
+  document.getElementById('p-rx-tb').innerHTML = `
+    <tr><td class="mono">#1042</td><td class="mono">${new Date().toLocaleDateString()}</td><td><span class="badge b-amber">Under Review</span></td><td>Desloratadine 5mg</td><td>—</td></tr>
+    <tr><td class="mono">#1038</td><td class="mono">${new Date(Date.now()-86400000).toLocaleDateString()}</td><td><span class="badge b-green">Approved</span></td><td>Panadol 500mg</td><td>—</td></tr>
+  `;
+  document.getElementById('orders-tb').innerHTML = `
+    <tr><td class="mono">#1042</td><td class="mono">${new Date().toLocaleDateString()}</td><td><span class="badge b-amber">Under Review</span></td><td>Desloratadine 5mg</td></tr>
+    <tr><td class="mono">#1038</td><td class="mono">${new Date(Date.now()-86400000).toLocaleDateString()}</td><td><span class="badge b-green">Approved</span></td><td>Panadol 500mg</td></tr>
+  `;
+}
+
+async function loadOrdersData() {
+  if (isDemoMode) {
+    patientOrdersCache = [
+      { prescription_id: 1042, uploaded_at: new Date().toISOString(), validation_status: 'pending', parsed_data: { drug: 'Desloratadine 5mg', qty: '30 tablets', doctor: 'Dr. K. El-Sayed' } },
+      { prescription_id: 1038, uploaded_at: new Date(Date.now()-86400000).toISOString(), validation_status: 'approved', parsed_data: { drug: 'Panadol 500mg', qty: '20 tablets', doctor: 'Dr. R. Adel' } },
+    ];
+    return patientOrdersCache;
+  }
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) { patientOrdersCache = []; return []; }
+    const email = encodeURIComponent(user.email || '');
+    const username = encodeURIComponent(user.user_metadata?.username || user.email?.split('@')[0] || '');
+    const data = await apiGet(`/api/prescriptions/mine?email=${email}&username=${username}&limit=50`);
+    patientOrdersCache = Array.isArray(data) ? data : [];
+    return patientOrdersCache;
+  } catch (e) {
+    patientOrdersCache = [];
+    toast('error', 'Orders', String(e.message || e).slice(0, 120));
+    return [];
+  }
+}
+
+function statusBadgeForOrder(status) {
+  if (status === 'approved') return '<span class="badge b-green">Approved</span>';
+  if (status === 'rejected') return '<span class="badge b-red">Rejected</span>';
+  return '<span class="badge b-amber">Under Review</span>';
+}
+
+function updatePatientOrderHint() {
+  const hint = document.getElementById('p-order-hint');
+  if (!hint) return;
+  const pending = (patientOrdersCache || []).filter(r => (r.validation_status || 'pending') === 'pending').length;
+  hint.textContent = pending ? `${pending} order(s) under review` : 'No pending orders';
+}
+
+async function loadOrdersView() {
+  await loadOrdersData();
+  if (!patientOrdersCache.length) demoPatient();
+
+  const rows = patientOrdersCache.length ? patientOrdersCache : [
+    { prescription_id: 1042, uploaded_at: new Date().toISOString(), validation_status: 'pending', parsed_data: { drug: 'Desloratadine 5mg', qty: '30 tablets', doctor: 'Dr. K. El-Sayed' } },
+  ];
+  const latest = rows[0];
+  const latestStatus = latest.validation_status || 'pending';
+  const parsed = latest.parsed_data || {};
+  const uploadedLabel = latest.uploaded_at ? new Date(latest.uploaded_at).toLocaleString() : 'Recent submission';
+
+  document.getElementById('orders-main-id').textContent = `Order #RX-${latest.prescription_id || '----'}`;
+  document.getElementById('orders-main-badge').innerHTML = statusBadgeForOrder(latestStatus);
+  document.getElementById('orders-step-submitted').textContent = uploadedLabel;
+  document.getElementById('orders-step-review').textContent = latestStatus === 'pending' ? 'Assigned to pharmacist and being reviewed' : 'Completed';
+  document.getElementById('orders-step-decision').textContent = latestStatus === 'pending' ? 'Pending' : latestStatus === 'approved' ? 'Approved by pharmacist' : 'Rejected by pharmacist';
+  document.getElementById('orders-step-ready').textContent = latestStatus === 'approved' ? 'Ready for pickup at pharmacy counter' : 'Pending';
+  document.getElementById('orders-main-detail').innerHTML = `<b>Drug:</b> ${parsed.drug || 'Processing...'} · <b>Qty:</b> ${parsed.qty || 'As prescribed'}<br><b>Prescribing Dr:</b> ${parsed.doctor || 'Not specified'}`;
+
+  const reviewDot = document.getElementById('orders-step-review-dot');
+  const decisionDot = document.getElementById('orders-step-decision-dot');
+  const readyDot = document.getElementById('orders-step-ready-dot');
+  reviewDot.className = `tl-dot ${latestStatus === 'pending' ? 'cur' : 'done'}`;
+  decisionDot.className = `tl-dot ${latestStatus !== 'pending' ? 'done' : ''}`.trim();
+  readyDot.className = `tl-dot ${latestStatus === 'approved' ? 'done' : ''}`.trim();
+
+  document.getElementById('orders-tb').innerHTML = rows.map(r => {
+    const p = r.parsed_data || {};
+    return `<tr>
+      <td class="mono">#${r.prescription_id || '----'}</td>
+      <td class="mono">${r.uploaded_at ? new Date(r.uploaded_at).toLocaleDateString() : '—'}</td>
+      <td>${statusBadgeForOrder(r.validation_status || 'pending')}</td>
+      <td>${p.drug || 'Processing...'}</td>
+    </tr>`;
+  }).join('');
+  updatePatientOrderHint();
+  buildNotifications();
+}
+
+/* UPLOAD */
+function handleFile(inp) {
+  const file = inp.files[0]; if (!file) return;
+  document.getElementById('u-preview').innerHTML = `<div style="background:var(--emerald-l);border:1px solid #6ee7b7;color:#059669;padding:8px 12px;border-radius:var(--r-xs);font-size:12px;font-weight:700"><i class="fa-solid fa-check"></i> ${file.name} ready</div>`;
+  document.getElementById('uzone').style.borderColor='var(--emerald)';
+}
+async function submitRx() {
+  const f = document.getElementById('ffile')?.files?.[0] || null;
+  const notes = document.getElementById('rx-notes').value;
+  if (!isDemoMode && sb) {
+    try {
+      const { data: { user } } = await sb.auth.getUser();
+      if (!user) { toast('error','Login required','Please sign in again to upload.'); return; }
+      const fd = new FormData();
+      fd.append('notes', notes || '');
+      fd.append('user_email', user.email || '');
+      fd.append('user_name', user.user_metadata?.username || user.email?.split('@')[0] || 'patient');
+      if (f) fd.append('file', f);
+      const r = await fetch('/api/prescriptions/', { method: 'POST', body: fd });
+      const t = await r.text();
+      if (!r.ok) throw new Error(t || r.statusText);
+    } catch(e){
+      toast('error','Upload failed', String(e.message || e).slice(0, 140));
+      return;
+    }
+  }
+  toast('success','Submitted!','Prescription queued for pharmacist review');
+  document.getElementById('rx-notes').value='';
+  const fi = document.getElementById('ffile'); if (fi) fi.value = '';
+  document.getElementById('u-preview').innerHTML='';
+  document.getElementById('uzone').style.borderColor='';
+  await loadOrdersData();
+  await loadPatientHome();
+  if (currentRole !== 'patient') loadQueue();
+}
+
+function loadUploadView() {
+  const zone = document.getElementById('uzone');
+  if (zone) zone.style.borderColor = '';
+}
+
+function renderChatMessages() {
+  const msgs = document.getElementById('chat-msgs');
+  const thread = chatThreads[activeChatThread] || chatThreads.general;
+  msgs.innerHTML = thread.messages.map(m => `<div class="msg ${m.side}"><div class="msg-bub">${m.text}</div><div class="msg-time">${m.time}</div></div>`).join('');
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function selectChatDoctor(threadId) {
+  activeChatThread = chatThreads[threadId] ? threadId : 'general';
+  document.querySelectorAll('#chat-sidebar .chat-li').forEach(el => {
+    el.classList.toggle('active', el.dataset.thread === activeChatThread);
+  });
+  document.getElementById('chat-active-name').textContent = chatThreads[activeChatThread].name;
+  const t = chatThreads[activeChatThread];
+  if (t) patientSeenMessageCount[activeChatThread] = t.messages.length;
+  renderChatMessages();
+  buildNotifications();
+  refreshChatThread();
+}
+
+function loadChatView() {
+  selectChatDoctor(activeChatThread);
+  refreshChatThread();
+}
+
+async function refreshChatThread() {
+  if (isDemoMode || !sb) return;
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+    const email = encodeURIComponent(user.email || '');
+    const threadId = encodeURIComponent(activeChatThread);
+    const rows = await apiGet(`/api/chat/messages?patient_email=${email}&thread_id=${threadId}&limit=100`);
+    const thread = chatThreads[activeChatThread] || chatThreads.ahmed;
+    thread.messages = Array.isArray(rows) ? rows : [];
+    if (patientSeenMessageCount[activeChatThread] == null) patientSeenMessageCount[activeChatThread] = thread.messages.length;
+    renderChatMessages();
+    buildNotifications();
+  } catch (e) {
+    toast('error', 'Chat', String(e.message || e).slice(0, 120));
+  }
+}
+
+async function sendMsg() {
+  const inp=document.getElementById('chat-inp'); const txt=inp.value.trim(); if(!txt)return;
+  const thread = chatThreads[activeChatThread] || chatThreads.ahmed;
+  const t=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  thread.messages.push({ side: 'sent', text: txt, time: t });
+  inp.value='';
+  renderChatMessages();
+  if (isDemoMode || !sb) return;
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+    await apiJson('POST', '/api/chat/messages', {
+      patient_email: user.email || '',
+      patient_name: currentUser?.name || user.user_metadata?.username || user.email?.split('@')[0] || 'Patient',
+      thread_id: activeChatThread,
+      sender_role: currentRole || 'patient',
+      sender_name: currentUser?.name || 'Patient',
+      text: txt,
+    });
+    await refreshChatThread();
+    const t2 = chatThreads[activeChatThread] || { messages: [] };
+    patientSeenMessageCount[activeChatThread] = t2.messages.length;
+    buildNotifications();
+  } catch (e) {
+    toast('error', 'Chat send', String(e.message || e).slice(0, 120));
+  }
+}
+
+function getPatientUnreadChatCount() {
+  let unread = 0;
+  Object.keys(chatThreads).forEach((k) => {
+    const t = chatThreads[k];
+    const seen = patientSeenMessageCount[k] ?? 0;
+    const later = (t?.messages || []).slice(seen);
+    unread += later.filter((m) => m.side === 'recv').length;
+  });
+  return unread;
+}
+
+async function loadDoctorChats() {
+  if (isDemoMode) {
+    const list = document.getElementById('dchat-list');
+    if (list) list.innerHTML = '<div class="empty" style="padding:12px">Doctor chats require live DB.</div>';
+    cachedDoctorChatCount = 0;
+    const cb = document.getElementById('badge-dchat');
+    if (cb) { cb.textContent = '0'; cb.style.display = 'none'; }
+    return;
+  }
+  try {
+    const doctorId = encodeURIComponent('doctor');
+    doctorChatsCache = await apiGet(`/api/doctor/chats?doctor_id=${doctorId}&limit=300`) || [];
+    cachedDoctorChatCount = doctorChatsCache.filter(c => c.needs_attention).length;
+    const cb = document.getElementById('badge-dchat');
+    if (cb) {
+      cb.textContent = String(cachedDoctorChatCount);
+      cb.style.display = cachedDoctorChatCount > 0 ? '' : 'none';
+    }
+    const list = document.getElementById('dchat-list');
+    if (!list) return;
+    if (!doctorChatsCache.length) {
+      list.innerHTML = '<div class="empty" style="padding:12px"><div class="empty-title">No conversations</div><div class="empty-sub">Patient requests will appear here.</div></div>';
+      const msgs = document.getElementById('dchat-msgs'); if (msgs) msgs.innerHTML = '';
+      return;
+    }
+    list.innerHTML = doctorChatsCache.map((c, i) => `
+      <div class="chat-li ${i===0?'active':''}" data-chat-key="${c.chat_key}" onclick="selectDoctorChat('${c.chat_key.replace(/'/g, "\\'")}')">
+        <div class="chat-av" style="background:var(--blue-100)"><i class="fa-solid fa-user"></i></div>
+        <div>
+          <div style="font-size:13px;font-weight:700">${c.patient_name || c.patient_email} ${c.request_status==='pending' ? '<span class="badge b-amber" style="margin-left:6px">Request</span>' : c.request_status==='declined' ? '<span class="badge b-red" style="margin-left:6px">Declined</span>' : ''} ${c.needs_attention ? '<span class="badge b-red" style="margin-left:6px">Unread</span>' : ''}</div>
+          <div style="font-size:11.5px;color:var(--text2)">${(c.last_message || '').slice(0,36) || 'No messages yet'}</div>
+        </div>
+      </div>
+    `).join('');
+    selectDoctorChat(doctorChatsCache[0].chat_key);
+    buildNotifications();
+  } catch (e) {
+    toast('error', 'Doctor chats', String(e.message || e).slice(0, 140));
+  }
+}
+
+async function refreshDoctorChatBadge() {
+  if (isDemoMode || (currentRole !== 'pharmacist' && currentRole !== 'doctor')) return;
+  try {
+    const rows = await apiGet('/api/doctor/chats?doctor_id=doctor&limit=300') || [];
+    cachedDoctorChatCount = rows.filter(c => c.needs_attention).length;
+    const cb = document.getElementById('badge-dchat');
+    if (cb) {
+      cb.textContent = String(cachedDoctorChatCount);
+      cb.style.display = cachedDoctorChatCount > 0 ? '' : 'none';
+    }
+  } catch (_) {
+    // Badge is non-blocking.
+  }
+}
+
+function selectDoctorChat(chatKey) {
+  doctorChatSelected = doctorChatsCache.find((c) => c.chat_key === chatKey) || null;
+  document.querySelectorAll('#dchat-list .chat-li').forEach((el) => {
+    el.classList.toggle('active', el.dataset.chatKey === chatKey);
+  });
+  const nm = document.getElementById('dchat-active-name');
+  if (nm) nm.textContent = doctorChatSelected ? (doctorChatSelected.patient_name || doctorChatSelected.patient_email) : 'Select a patient';
+  loadDoctorChatMessages();
+}
+
+async function loadDoctorChatMessages() {
+  const msgs = document.getElementById('dchat-msgs');
+  if (!msgs) return;
+  if (!doctorChatSelected) { msgs.innerHTML = ''; return; }
+  try {
+    const doctorId = encodeURIComponent('doctor');
+    const pe = encodeURIComponent(doctorChatSelected.patient_email || '');
+    const th = encodeURIComponent(doctorChatSelected.thread_id || 'general');
+    const res = await apiGet(`/api/doctor/chats/messages?doctor_id=${doctorId}&patient_email=${pe}&thread_id=${th}&limit=300`) || { request_status: 'approved', messages: [] };
+    doctorChatSelected.request_status = res.request_status || doctorChatSelected.request_status || 'approved';
+    const rows = Array.isArray(res.messages) ? res.messages : [];
+    const requestControls = doctorChatSelected.request_status === 'pending'
+      ? `<div style="margin-bottom:10px;display:flex;gap:8px">
+          <button class="btn btn-green btn-sm" onclick="decideDoctorChatRequest('approved')"><i class="fa-solid fa-check"></i> Approve Request</button>
+          <button class="btn btn-red btn-sm" onclick="decideDoctorChatRequest('declined')"><i class="fa-solid fa-xmark"></i> Decline</button>
+          <button class="btn btn-ghost btn-sm" onclick="deleteDoctorChat()"><i class="fa-solid fa-trash"></i> Delete Chat</button>
+        </div>`
+      : `<div style="margin-bottom:10px;display:flex;gap:8px">
+          <span class="badge ${doctorChatSelected.request_status==='approved'?'b-green':'b-red'}">${doctorChatSelected.request_status || 'approved'}</span>
+          <button class="btn btn-ghost btn-sm" onclick="deleteDoctorChat()"><i class="fa-solid fa-trash"></i> Delete Chat</button>
+        </div>`;
+    msgs.innerHTML = requestControls + rows.map((m) => `
+      <div class="msg ${m.sender === 'doctor' ? 'sent' : 'recv'}">
+        <div class="msg-bub">${m.message || ''}</div>
+        <div class="msg-time">${m.timestamp ? new Date(m.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : ''}</div>
+      </div>
+    `).join('');
+    msgs.scrollTop = msgs.scrollHeight;
+    updateDoctorComposerState(doctorChatSelected.request_status || 'approved');
+  } catch (e) {
+    toast('error', 'Chat messages', String(e.message || e).slice(0, 120));
+  }
+}
+
+function updateDoctorComposerState(status) {
+  const inp = document.getElementById('dchat-inp');
+  const btn = document.querySelector('#view-doctor-chats .chat-footer .btn.btn-blue');
+  if (!inp || !btn) return;
+  const enabled = status === 'approved';
+  inp.disabled = !enabled;
+  btn.disabled = !enabled;
+  inp.placeholder = enabled ? 'Type a reply...' : (status === 'declined' ? 'Request declined. Approve to reopen messaging.' : 'Approve request first to reply...');
+}
+
+async function sendDoctorMsg() {
+  const inp = document.getElementById('dchat-inp');
+  const txt = inp?.value?.trim();
+  if (!txt || !doctorChatSelected) return;
+  if ((doctorChatSelected.request_status || 'approved') !== 'approved') {
+    toast('warning', 'Approve request first', 'Doctor must approve this chat request before replying.');
+    return;
+  }
+  try {
+    await apiJson('POST', '/api/doctor/chats/messages', {
+      doctor_id: 'doctor',
+      patient_email: doctorChatSelected.patient_email,
+      patient_name: doctorChatSelected.patient_name,
+      thread_id: doctorChatSelected.thread_id,
+      sender_name: currentUser?.name || 'Doctor',
+      message: txt,
+    });
+    inp.value = '';
+    await loadDoctorChatMessages();
+    await loadDoctorChats();
+  } catch (e) {
+    toast('error', 'Send failed', String(e.message || e).slice(0, 120));
+  }
+}
+
+async function decideDoctorChatRequest(decision) {
+  if (!doctorChatSelected) return;
+  try {
+    await apiJson('PATCH', '/api/doctor/chats/request', {
+      doctor_id: 'doctor',
+      patient_email: doctorChatSelected.patient_email,
+      thread_id: doctorChatSelected.thread_id,
+      decision,
+    });
+    toast('success', 'Request updated', `Chat request ${decision}.`);
+    await loadDoctorChats();
+  } catch (e) {
+    toast('error', 'Request update failed', String(e.message || e).slice(0, 120));
+  }
+}
+
+async function deleteDoctorChat() {
+  if (!doctorChatSelected) return;
+  if (!confirm('Delete this chat thread from doctor inbox?')) return;
+  try {
+    await apiJson('POST', '/api/doctor/chats/delete', {
+      doctor_id: 'doctor',
+      patient_email: doctorChatSelected.patient_email,
+      thread_id: doctorChatSelected.thread_id,
+    });
+    toast('success', 'Chat deleted', 'Thread removed from doctor inbox.');
+    await loadDoctorChats();
+  } catch (e) {
+    toast('error', 'Delete failed', String(e.message || e).slice(0, 120));
+  }
+}
+
+function loadSymptomsView() {
+  const name = document.getElementById('sym-name');
+  if (name && !name.value) name.value = currentUser?.name || '';
+}
+
+async function submitSymptoms() {
+  const name = document.getElementById('sym-name').value.trim();
+  const age = parseInt(document.getElementById('sym-age').value || 0);
+  const symptoms = document.getElementById('sym-txt').value.trim();
+  const duration = document.getElementById('sym-duration').value;
+  const allergies = document.getElementById('sym-allergies').value.trim();
+  if (!symptoms) { toast('error','Required','Please describe your symptoms.'); return; }
+  if (!name) { toast('error','Required','Please provide your full name.'); return; }
+
+  if (sb && !isDemoMode) {
+    try {
+      const { data: { user } } = await sb.auth.getUser();
+      await apiJson('POST', '/api/chat/requests', {
+        patient_name: name,
+        patient_email: user?.email || '',
+        age: age || null,
+        symptoms,
+        duration,
+        allergies: allergies || null,
+        preferred_contact: 'chat',
+      });
+    } catch (e) {
+      await logAction('SYMPTOM_REQUEST', { patient_name: name, symptoms, duration, allergies });
+    }
+  }
+  toast('success','Request Submitted','A pharmacist will review your case and respond shortly.');
+  document.getElementById('sym-txt').value='';
+  document.getElementById('sym-allergies').value='';
+}
+
+/* SETTINGS */
+function loadSettingsView() {
+  const dname = document.getElementById('cfg-dname');
+  if (dname) dname.value = currentUser?.name || dname.value;
+}
+
+async function reconnectSupabase() {
+  const url=document.getElementById('cfg-url').value; const key=document.getElementById('cfg-key').value;
+  cachedDrugRows = [];
+  liveFc = null;
+  initSB(url,key); setupRealtime(); updateConnStatus('live');
+  toast('success','Reconnected','Refreshing data…'); await loadAllData();
+}
+async function saveProfile() {
+  const dname = document.getElementById('cfg-dname')?.value?.trim();
+  if (dname) {
+    if (currentUser) currentUser.name = dname;
+    const nm = document.getElementById('sb-name'); if (nm) nm.textContent = dname;
+    const av = document.getElementById('sb-avatar');
+    if (av) av.textContent = dname.split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  }
+  const newpass=document.getElementById('cfg-pass').value;
+  if(newpass && sb && !isDemoMode){try{await sb.auth.updateUser({password:newpass});}catch(e){toast('error','Error',e.message);return;}}
+  document.getElementById('cfg-pass').value = '';
+  toast('success','Profile Saved','Changes applied');
+}
+async function countAllRows() {
+  const tables=['users','drugs','inventory','prescriptions','predictions','transactions','auditlogs'];
+  let html='';
+  for(const t of tables){
+    let count='?';
+    if(sb&&!isDemoMode){try{const {count:c}=await sb.from(t).select('*',{count:'exact',head:true});count=c??0;}catch(e){count='err';}}
+    html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px"><span class="mono">${t}</span><span class="badge b-gray">${count} rows</span></div>`;
+  }
+  document.getElementById('db-counts').innerHTML=html;
+}
+
+/* CHARTS */
+const CO = {
+  responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{labels:{color:'#475569',font:{family:'Plus Jakarta Sans',size:11},boxWidth:10}}},
+  scales:{x:{grid:{display:false},ticks:{color:'#94a3b8'}},y:{grid:{color:'#f1f5f9'},ticks:{color:'#94a3b8'}}}
+};
+function destroyChart(k){if(charts[k]){charts[k].destroy();delete charts[k];}}
+function destroyAllCharts(){Object.keys(charts).forEach(k=>{charts[k]?.destroy();delete charts[k];});if(fcChartObj){fcChartObj.destroy();fcChartObj=null;}}
+
+async function initDashCharts(){
+  const cW = document.getElementById('ch-weekly');
+  const cD = document.getElementById('ch-donut');
+  if (!cW || !cD) return;
+  if (typeof Chart === 'undefined') {
+    toast('warning', 'Charts unavailable', 'Chart library did not load; dashboard charts are disabled.');
+    return;
+  }
+  destroyChart('weekly'); destroyChart('donut');
+  let labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  let actual = [312,298,345,389,401,278,264];
+  let fcLine = actual.map(v=>Math.round(v*1.03));
+  if (usesLiveBackend()) {
+    const sh = await loadSalesHistoryForCharts(21);
+    if (Array.isArray(sh) && sh.length) {
+      const byDay = {};
+      sh.forEach(r => {
+        const k = r.sale_date;
+        if (!k) return;
+        byDay[k] = (byDay[k] || 0) + (Number(r.quantity_sold) || 0);
+      });
+      const sorted = Object.keys(byDay).sort();
+      const last7 = sorted.slice(-7);
+      labels = last7.map(d=>{const dt=new Date(d+'T12:00:00');return (dt.getMonth()+1)+'/'+dt.getDate();});
+      actual = last7.map(d=>byDay[d]);
+      fcLine = actual.map(v=>Math.max(0, Math.round(v*1.04)));
+    } else {
+      const base = Math.max(40, Math.round(getForecastRows().reduce((s,f)=>s+f.predicted_daily_usage,0)));
+      labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+      actual = labels.map((_,i)=>Math.round(base*(0.82+((i*7)%23)/100)));
+      fcLine = actual.map(v=>Math.round(v*1.05));
+    }
+  }
+  const rows = getForecastRows();
+  const nc = rows.filter(f=>f.alert_level==='CRITICAL').length;
+  const nw = rows.filter(f=>f.alert_level==='WARNING').length;
+  const nok = Math.max(0, rows.length - nc - nw);
+  charts.weekly=new Chart(document.getElementById('ch-weekly').getContext('2d'),{type:'line',data:{labels,datasets:[{label:'Qty sold',data:actual,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.08)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#2563eb',borderWidth:2},{label:'Trend',data:fcLine,borderColor:'#10b981',borderDash:[5,3],backgroundColor:'transparent',tension:.4,pointRadius:3,borderWidth:2}]},options:{...CO}});
+  const donutLabels = nc+nw+nok===0 ? ['Awaiting forecasts'] : [`Critical (${nc})`,`Warning (${nw})`,`OK (${nok})`];
+  const donutData = nc+nw+nok===0 ? [1] : [nc,nw,nok];
+  const donutBg = nc+nw+nok===0 ? ['#94a3b8'] : ['#ef4444','#f59e0b','#10b981'];
+  charts.donut=new Chart(document.getElementById('ch-donut').getContext('2d'),{type:'doughnut',data:{labels:donutLabels,datasets:[{data:donutData,backgroundColor:donutBg,borderWidth:0,hoverOffset:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#475569',font:{family:'Plus Jakarta Sans',size:11},boxWidth:10,padding:14}}},cutout:'66%'}});
+}
+
+function renderFcChart(){
+  const c = document.getElementById('ch-fc');
+  if (!c) return;
+  if (typeof Chart === 'undefined') return;
+  if(fcChartObj){fcChartObj.destroy();fcChartObj=null;}
+  populateFcSel();
+  const fcRows = getForecastRows();
+  if (!fcRows.length) return;
+  const idx=Math.min(fcRows.length-1,Math.max(0,parseInt(document.getElementById('fc-sel')?.value||0,10)));
+  const d=fcRows[idx];
+  const start = new Date();
+  start.setHours(12,0,0,0);
+  const fm = Array.isArray(d.forecast_30d) && d.forecast_30d.length ? d.forecast_30d : Array(30).fill(d.predicted_daily_usage||0);
+  const labels=fm.map((_,i)=>{const dt=new Date(start);dt.setDate(dt.getDate()+i);return (dt.getMonth()+1)+'/'+dt.getDate();});
+  const actual=fm.map(v=>+(v+(Math.random()-.5)*(d.model_mae||2)*1.5).toFixed(1));
+  fcChartObj=new Chart(c.getContext('2d'),{type:'line',data:{labels,datasets:[
+    {label:'Historical',data:actual,borderColor:'#94a3b8',backgroundColor:'rgba(148,163,184,.08)',fill:true,tension:.35,pointRadius:2,borderWidth:1.5},
+    {label:'30-Day Forecast',data:fm,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.1)',fill:true,tension:.35,pointRadius:3,borderWidth:2}
+  ]},options:{...CO,scales:{x:{grid:{display:false},ticks:{color:'#94a3b8',maxTicksLimit:10}},y:{grid:{color:'#f1f5f9'},ticks:{color:'#94a3b8'},title:{display:true,text:'Units / day',color:'#94a3b8',font:{size:11}}}}}});
+}
+
+function initRevCharts(){
+  const cR = document.getElementById('ch-rev');
+  const cTop = document.getElementById('ch-top');
+  if (!cR || !cTop) return;
+  if (typeof Chart === 'undefined') return;
+  destroyChart('rev'); destroyChart('top');
+  charts.rev=new Chart(document.getElementById('ch-rev').getContext('2d'),{type:'bar',data:{labels:['Oct','Nov','Dec','Jan','Feb','Mar','Apr'],datasets:[{label:'Revenue (SAR)',data:[89200,94500,112000,98700,105400,119800,128450],backgroundColor:'rgba(37,99,235,.7)',borderRadius:6,borderSkipped:false}]},options:{...CO}});
+  const top=getForecastRows().slice().sort((a,b)=>b.predicted_daily_usage-a.predicted_daily_usage).slice(0,6);
+  const lbls = top.length ? top.map(d=>(d.drug_name||'').split(' ').slice(0,2).join(' ').trim() || 'Drug') : ['No forecast data'];
+  const vals = top.length ? top.map(d=>Math.round((d.predicted_daily_usage||0)*30)) : [0];
+  charts.top=new Chart(document.getElementById('ch-top').getContext('2d'),{type:'bar',data:{labels:lbls,datasets:[{data:vals,backgroundColor:['#2563eb','#10b981','#8b5cf6','#f59e0b','#ef4444','#06b6d4'],borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',...CO,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#f1f5f9'},ticks:{color:'#94a3b8'}},y:{grid:{display:false},ticks:{color:'#64748b',font:{size:11}}}}}});
+}
+
+/* NOTIFICATIONS */
+function buildNotifications(){
+  if (currentRole === 'patient') {
+    const pend = (patientOrdersCache || []).filter(r => (r.validation_status || 'pending') === 'pending').length;
+    const unread = getPatientUnreadChatCount();
+    document.getElementById('notif-count').textContent = String((pend > 0 ? 1 : 0) + (unread > 0 ? 1 : 0) + 1);
+    document.getElementById('notif-list').innerHTML = [
+      ...(pend > 0 ? [{ ico:'<i class="fa-solid fa-clipboard-list"></i>', t:'Order under review', s:`${pend} prescription(s) pending pharmacist review`, tm:'Portal' }] : []),
+      ...(unread > 0 ? [{ ico:'<i class="fa-solid fa-comments"></i>', t:'New pharmacist message', s:`${unread} unread message(s)`, tm:'Chat' }] : []),
+      { ico:'<i class="fa-solid fa-comments"></i>', t:'Messaging', s:'Reach your pharmacist from Chat', tm:'Tips' },
+    ].map(n=>`<div class="notif-item"><div class="notif-ico">${n.ico}</div><div><div class="notif-t">${n.t}</div><div class="notif-s">${n.s}</div><div class="notif-tm">${n.tm}</div></div></div>`).join('');
+    return;
+  }
+  const critical=getForecastRows().filter(f=>f.alert_level==='CRITICAL');
+  const pend = cachedPendingCount;
+  const chats = cachedDoctorChatCount;
+  document.getElementById('notif-count').textContent=critical.length+(pend>0?1:0)+(chats>0?1:0)+1;
+  document.getElementById('notif-list').innerHTML=[
+    ...critical.map(d=>({ico:'<i class="fa-solid fa-circle" style="color:#ef4444"></i>',t:`CRITICAL: ${d.drug_name}`,s:`~${Math.round(d.days_remaining*10)/10} days remaining`,tm:'Forecast'})),
+    ...(pend > 0 ? [{ico:'<i class="fa-solid fa-inbox"></i>',t:`${pend} prescription(s) awaiting review`,s:'Open Approval Queue',tm:'Now'}] : []),
+    ...(chats > 0 ? [{ico:'<i class="fa-solid fa-comments"></i>',t:`${chats} active patient chat(s)`,s:'Open Patient Chats inbox',tm:'Now'}] : []),
+    {ico:'<i class="fa-solid fa-comments"></i>',t:'Patient message received',s:'Sara K. — awaiting response',tm:'12m ago'},
+  ].map(n=>`<div class="notif-item"><div class="notif-ico">${n.ico}</div><div><div class="notif-t">${n.t}</div><div class="notif-s">${n.s}</div><div class="notif-tm">${n.tm}</div></div></div>`).join('');
+}
+
+/* UTILS */
+function toast(type,title,sub) {
+  const c=document.getElementById('toasts');
+  const el=document.createElement('div');
+  el.className=`toast ${type}`;
+  el.innerHTML=`<span class="toast-ico">${{success:'<i class="fa-solid fa-circle-check"></i>',error:'<i class="fa-solid fa-circle-xmark"></i>',info:'<i class="fa-solid fa-circle-info"></i>',warning:'<i class="fa-solid fa-triangle-exclamation"></i>'}[type]}</span><div class="toast-body"><div class="toast-title">${title}</div><div class="toast-sub">${sub||''}</div></div><span class="toast-x" onclick="this.parentNode.remove()"><i class="fa-solid fa-xmark"></i></span>`;
+  c.appendChild(el); setTimeout(()=>el.remove(),5000);
+}
+function openModal(title,body){document.getElementById('modal-title').textContent=title;document.getElementById('modal-body').innerHTML=body;document.getElementById('modal').style.display='flex';}
+function closeModal(){document.getElementById('modal').style.display='none';}
+function maybeCloseModal(e){if(e.target===document.getElementById('modal'))closeModal();}
+function toggleNotif(e){e?.stopPropagation();document.getElementById('notif-panel').classList.toggle('open');}
+function closeNotif(){document.getElementById('notif-panel').classList.remove('open');}
+function globalSearch(q){if(q.length>2){const m=getForecastRows().filter(f=>f.drug_name.toLowerCase().includes(q.toLowerCase()));if(m.length)toast('info',`Found: "${q}"`,`${m.length} drug(s) matched — check Drug Lookup`);}}
+function scoreBadge(s){const c=s>=.9?'b-green':s>=.8?'b-blue':'b-amber';return `<span class="badge ${c}">${s.toFixed(2)}</span>`;}
+
+/* INIT */
+window.addEventListener('DOMContentLoaded',()=>{
+  initSB(SB_URL, SB_KEY);
+  // Try to restore existing session
+  if(sb){
+    sb.auth.getSession().then(({data:{session}})=>{
+      if(session?.user){
+        const u=session.user;
+        const role=u.user_metadata?.role||'patient';
+        const name=u.user_metadata?.username||u.email.split('@')[0];
+        enterApp(name,role,false);
+      }
+    }).catch(()=>{});
+  }
+});
+window.addEventListener('error', (e) => {
+  const app = document.getElementById('app-screen');
+  if (app && app.style.display !== 'none') {
+    toast('error', 'Runtime error', e?.message || 'Unexpected UI error');
+    setTimeout(() => ensureVisibleAppView(), 20);
+  }
+});
+window.addEventListener('unhandledrejection', (e) => {
+  const app = document.getElementById('app-screen');
+  if (app && app.style.display !== 'none') {
+    toast('error', 'Async error', e?.reason?.message || 'Unhandled promise rejection');
+    setTimeout(() => ensureVisibleAppView(), 20);
+  }
+});
+</script>
+</body>
+</html>

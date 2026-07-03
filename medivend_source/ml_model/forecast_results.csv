@@ -1,0 +1,16 @@
+drug_id,drug_name,trade_name,category,current_stock,predicted_daily_usage,days_remaining,stock_out_date,alert_level,model_mae,model_r2
+1,Multivitamins Syrup,Junior Syrup w/ Royal Jelly,Supplement,145,21.9,6.6,2026-07-06,WARNING,2.78,0.293
+2,Urea 10% Cream,Eucerin Urea Repair,Dermatology,88,17.6,5.0,2026-07-04,WARNING,1.96,0.411
+3,FreeStyle Libre Reader,FreeStyle Libre 2 Reader,Diabetes Device,22,3.6,6.2,2026-07-05,WARNING,0.58,0.014
+4,FreeStyle Libre Sensor,FreeStyle Libre 2 Sensor,Diabetes Device,55,11.8,4.6,2026-07-04,CRITICAL,1.43,0.04
+5,Activated Charcoal Powder,VitaThrive Charcoal,Gastro,67,9.1,7.3,2026-07-07,WARNING,1.2,0.037
+6,Calamine Lotion 8%,Calarose Lotion,Dermatology,102,13.5,7.5,2026-07-07,WARNING,1.52,0.456
+7,BD Insulin Pen Needle 4mm,BD Microfine Pen Needle,Diabetes,210,27.8,7.5,2026-07-07,WARNING,3.28,0.017
+8,Desloratadine 5mg,Deslin 5mg Film-coated,Allergy,134,23.3,5.7,2026-07-05,WARNING,3.25,0.303
+9,Zinc Oxide 15% Cream,Diaper Rash Cream Plus,Dermatology,79,15.9,5.0,2026-07-04,CRITICAL,1.87,0.365
+10,Diosmin 500mg,Capillo Film-coated,Vascular,43,10.0,4.3,2026-07-04,CRITICAL,1.29,0.013
+11,Perampanel 2mg,Fycompa 2mg,Neurology,18,4.8,3.8,2026-07-03,CRITICAL,0.7,0.014
+12,Accu-Chek Test Strips,Accu-Chek Instant Strips,Diabetes,95,21.2,4.5,2026-07-04,CRITICAL,2.61,0.012
+13,Panadol 500mg,Panadol Extra,Analgesic,312,34.4,9.1,2026-07-08,WARNING,5.12,0.461
+14,Amoxicillin 500mg,Amoxil 500mg Capsules,Antibiotic,56,16.3,3.4,2026-07-03,CRITICAL,2.1,0.481
+15,Ibuprofen 400mg,Brufen 400mg,Analgesic,178,25.8,6.9,2026-07-06,WARNING,3.83,0.461
